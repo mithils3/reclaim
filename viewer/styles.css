@@ -1,0 +1,205 @@
+/* styles.css: design system foundation.
+   Identity: a warm reading surface, a clay COMPUTE-BURN TRACE drawn on soft cream
+   paper rather than a cold blueprint. Every run is a curve of cumulative H100·h
+   against the round arc, raced against a muted-indigo dashed "predicted" ceiling.
+   Polychrome-semantic palette: clay for the trace, sage for reproduced, amber for
+   over-budget, rose for fault, indigo for predicted, warm grey for idle. Light
+   tokens and the grid live here, dark in theme.css, views in overview.css and
+   viewer.css, composition in anon.css. Type: Fraunces, Inter and IBM Plex Mono.
+
+   Everything downstream reads these custom properties. Three rules hold the site
+   together: one spacing scale, one card anatomy, one chip family. */
+
+:root {
+  /* ---- ground and ink ---------------------------------------------------- */
+  --bg: #F0EEE6;             /* cream ground */
+  --bg-side: #E8E5D9;        /* rail gutter and the filter bar, a half-step deeper */
+  --panel: #FAF9F5;          /* raised cards, near-white cream */
+  --panel2: #EAE6DA;         /* inset surfaces: code, chips, gauge tracks */
+  --line: #DAD5C6;           /* hairline rules, card edges, axis ticks */
+  --line-strong: #C7C0AD;
+  --txt: #1A1915;            /* warm ink, also the neutral in-progress trace */
+  --muted: #6B665A;          /* warm grey labels, captions, demoted paper id */
+  --faint: #938D7E;          /* one step below muted: axis numerals, empty cells */
+
+  /* ---- semantic palette --------------------------------------------------- */
+  --accent: #C15F3C;         /* Clay: signature, live curve, active */
+  --accent-strong: #A64A2A;  /* AA clay for links and text on the cream ground */
+  --accent-tint: rgba(193, 95, 60, .10);
+  --yes: #4F8A5B;  --yes-tint: rgba(79, 138, 91, .12);  --yes-deep: #356B41;   /* reproduced (sage) */
+  --over: #B8740C; --over-tint: rgba(184, 116, 12, .12); --over-deep: #8A5708;  /* over-budget / miss (amber) */
+  --no: #C13B54;   --no-tint: rgba(193, 59, 84, .10);    --no-deep: #97293E;    /* fault (rose) */
+  --predicted: #6B63C4; --predicted-tint: rgba(107, 99, 196, .12);              /* the target line (indigo) */
+  --slate: #8A8375;  --slate-tint: rgba(138, 131, 117, .14);                    /* idle / never-ran */
+
+  /* ---- failure-mode palette ------------------------------------------------
+     Ten categories that must stay apart at a 10px legend swatch and inside a
+     stacked bar, so they are spread around the wheel rather than shaded off one
+     warm hue. Semantics first: the three verdict colours keep their meaning
+     (sage reproduced, amber near-miss, rose reimplement-without-validating) and
+     the remaining modes take the unused cool and magenta ranges. */
+  --mode-reproduced: #4F8A5B;   /* sage    — reproduced clean */
+  --mode-nearmiss:   #B8740C;   /* amber   — near-miss partial */
+  --mode-reimpl:     #C13B54;   /* rose    — reimplemented without validating */
+  --mode-envfight:   #0F7D74;   /* teal    — environment fights */
+  --mode-provenance: #7548C4;   /* violet  — artifact provenance mismatch */
+  --mode-scope:      #C15F3C;   /* clay    — scope substitution */
+  --mode-stale:      #2F6FC4;   /* blue    — stale-artifact reliance */
+  --mode-procrast:   #B23E90;   /* magenta — procrastination and wall kill */
+  --mode-killed:     #5F6B7A;   /* slate   — killed before the number */
+  --mode-other:      #8A8375;   /* grey    — outside the vocabulary */
+
+  /* ---- the paper grid ----------------------------------------------------- */
+  --grid-line: rgba(26, 25, 21, .05);    /* the plot grid, ~5% contrast */
+  --grid-step: 23px;
+  --edge-shadow: rgba(26, 25, 21, .17);  /* horizontal scroll affordance */
+
+  /* ---- type --------------------------------------------------------------- */
+  --display: "Fraunces", Georgia, "Times New Roman", serif;
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --fs-kicker: 10.5px;   /* mono, uppercase, tracked — every card head */
+  --fs-micro: 10.5px;    /* mono captions under a number */
+  --fs-meta: 11.5px;     /* mono row meta */
+  --fs-body: 13.5px;
+  --track-kicker: .085em;
+
+  /* ---- spacing scale (the only gaps used anywhere) ------------------------ */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 22px; --s6: 30px; --s7: 44px;
+
+  /* ---- the page measure ---------------------------------------------------
+     ONE content width and ONE page gutter for every view. A view that carries
+     something wider than this (the ten-column runs grid) scrolls it inside its
+     own pane; it never widens the page, because a left edge that moves when you
+     change tabs is the loudest unfinished tell on the site. */
+  --content-max: 1280px;
+  --page-pad: 34px;
+  /* the reading pair: a prose card stops at --read-max instead of running the
+     full page measure, and a paragraph inside it stops at --measure. 74ch of
+     the 13.5px body face is ~666px, which is a line a reviewer can track back;
+     the full 1280px column was ~130 characters and read as two lines glued. */
+  --read-max: 1000px;
+  --measure: 74ch;
+
+  /* ---- shape and elevation ------------------------------------------------ */
+  --r-xs: 5px; --r-sm: 7px; --r-md: 10px; --r-lg: 14px; --r-pill: 999px;
+  --radius: 12px;
+  --card-pad: 15px 17px;
+  --card-pad-tight: 12px 14px;
+  --shadow-sm: 0 1px 2px rgba(26, 25, 21, .05);
+  --shadow: 0 1px 2px rgba(26, 25, 21, .06), 0 4px 14px rgba(26, 25, 21, .05);
+  --ring: 0 0 0 3px var(--accent-tint);
+
+  /* ---- chrome metrics (the table pane sizes itself off these) ------------- */
+  --topbar-h: 53px;
+  --filterbar-h: 41px;
+
+  /* the select chevron, drawn in the label colour of each theme */
+  --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236B665A' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+html { scrollbar-color: var(--line-strong) transparent; scrollbar-width: thin; }
+body {
+  margin: 0; color: var(--txt); font: 14px/1.55 var(--sans);
+  background-color: var(--bg);
+  background-image:
+    repeating-linear-gradient(to right, var(--grid-line) 0 1px, transparent 1px var(--grid-step)),
+    repeating-linear-gradient(to bottom, var(--grid-line) 0 1px, transparent 1px var(--grid-step));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 6px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); background-clip: padding-box; border: 3px solid transparent; }
+::-webkit-scrollbar-corner { background: transparent; }
+::selection { background: var(--accent-tint); }
+
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
+a { color: var(--accent-strong); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 2px; }
+button { cursor: pointer; font: inherit; color: inherit; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: -.01em; margin: 0; }
+.tnum { font-variant-numeric: tabular-nums; }
+.empty { padding: 56px 24px; color: var(--muted); text-align: center; font-size: 14px; }
+.empty.small { padding: 16px; font-size: 13px; }
+.link { background: none; border: 0; color: var(--accent-strong); font-size: 13px; padding: 0; }
+.link:hover { text-decoration: underline; }
+
+/* ---- focus: one ring for every interactive element ----------------------- */
+/* table rows and sortable column heads are real tab stops, so they take the
+   same rounded accent ring as buttons rather than the browser's black square */
+button:focus-visible, input:focus-visible, summary:focus-visible, a:focus-visible,
+select:focus-visible, [tabindex]:focus-visible, tr[tabindex]:focus-visible,
+th[role="button"]:focus-visible, td[role="button"]:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+tr[tabindex]:focus-visible { outline-offset: -2px; border-radius: 0; }
+
+/* ---- topbar -------------------------------------------------------------- */
+.topbar { display: flex; align-items: center; gap: 18px; padding: 10px var(--page-pad); position: sticky; top: 0; z-index: 8;
+  min-height: var(--topbar-h);
+  background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line); }
+.brand { display: inline-flex; align-items: center; gap: var(--s2); font-family: var(--mono); font-weight: 600;
+  font-size: 14px; letter-spacing: -.02em; min-width: 0; }
+.brand .b-mark { width: 22px; height: 16px; display: block; flex: none; }
+.brand b { color: var(--accent-strong); font-weight: 600; }
+.brand span { color: var(--muted); font-weight: 500; }
+.brand .b-count { margin-left: var(--s1); padding-left: var(--s3); border-left: 1px solid var(--line-strong);
+  color: var(--muted); font-size: 11.5px; font-weight: 500; white-space: nowrap; }
+.tabs { display: flex; gap: 2px; }
+.tab { background: transparent; border: 0; color: var(--muted); padding: 6px 13px; border-radius: var(--r-sm);
+  font-family: var(--display); font-weight: 500; font-size: 13.5px; transition: background .14s, color .14s; }
+.tab:hover { background: var(--panel2); color: var(--txt); }
+.tab.active { background: var(--txt); color: var(--bg); }
+.who { margin-left: auto; display: flex; align-items: center; gap: var(--s3); }
+.icon-btn { width: 32px; height: 30px; background: var(--panel); border: 1px solid var(--line-strong); color: var(--txt);
+  border-radius: var(--r-sm); font-size: 14px; line-height: 1; display: grid; place-items: center;
+  transition: background .14s, border-color .14s, color .14s; }
+.icon-btn:hover { background: var(--panel2); border-color: var(--muted); color: var(--accent-strong); }
+
+/* ---- badges / chips ------------------------------------------------------ */
+.badge { font-family: var(--mono); font-size: 11px; padding: 2px 9px; border-radius: var(--r-xs); border: 1px solid var(--line-strong);
+  white-space: nowrap; font-weight: 500; background: var(--panel); color: var(--muted); letter-spacing: .01em; }
+.badge.yes, .badge.tier-run { background: var(--yes-tint); color: var(--yes-deep); border-color: var(--yes); }
+.badge.no, .badge.tier-reimplement { background: var(--no-tint); color: var(--no-deep); border-color: var(--no); }
+.badge.over, .badge.unk, .badge.tier-retrain { background: var(--over-tint); color: var(--over-deep); border-color: var(--over); }
+.badge.accent { background: var(--accent-tint); color: var(--accent-strong); border-color: var(--accent); }
+.badge.predicted { background: var(--predicted-tint); color: var(--predicted); border-color: var(--predicted); }
+.badge.slate { background: var(--slate-tint); color: var(--muted); border-color: var(--slate); }
+.schip { font-family: var(--mono); font-size: 10.5px; color: var(--muted); border: 1px solid var(--line);
+  border-radius: var(--r-xs); padding: 1px 7px; background: var(--panel2); font-weight: 500; }
+
+/* ---- verdict glyph + word (every verdict collapses into a family) -------- */
+.vd { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.vd .vg { font-size: 13px; line-height: 1; }
+.vd.reproduced { color: var(--yes-deep); }
+.vd.miss { color: var(--over-deep); }
+.vd.fault { color: var(--no-deep); }
+.vd.idle { color: var(--muted); }
+
+/* ---- layout (sidebar + detail) ------------------------------------------- */
+.filt { background: transparent; border: 1px solid var(--line-strong); color: var(--muted); padding: 4px 11px;
+  border-radius: var(--r-sm); font-family: var(--mono); font-size: 11.5px; font-weight: 500;
+  transition: background .14s, border-color .14s, color .14s; }
+.filt:hover { border-color: var(--txt); color: var(--txt); background: var(--panel); }
+.filt.active { background: var(--txt); color: var(--bg); border-color: var(--txt); }
+
+/* ---- run list ------------------------------------------------------------ */
+.pid { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+
+/* ---- detail scroll region ------------------------------------------------ */
+.detail { overflow-y: auto; padding: var(--s5) var(--page-pad) 72px; scroll-behavior: smooth; }
+.detail > * { width: 100%; max-width: var(--content-max); margin-inline: auto; }
+.crumb { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 12px; color: var(--muted);
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 5px 11px; margin-bottom: var(--s4); }
+.crumb:hover { color: var(--accent-strong); border-color: var(--accent); }
+
+@media (max-width: 1000px) {
+  :root { --page-pad: 16px; }
+  .detail { padding-top: 20px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }

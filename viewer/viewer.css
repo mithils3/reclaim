@@ -1,0 +1,251 @@
+/* viewer.css: the run transcript "strip chart": run header + fuel gauge, the
+   sticky vertical burn-trace rail (minimap/scrollbar), round cards (reasoning &
+   assistant on flat cards, tool calls, stdout/stderr), the verdict cap, run tags
+   and the local drop zone. Reuses the design-system tokens from styles.css. */
+
+/* ---- run header ----------------------------------------------------------- */
+.run-detail { padding-bottom: 40px; }
+.rt-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.rt-head .vd { font-size: 13px; }
+.rt-links { display: inline-flex; gap: 10px; font-family: var(--mono); font-size: 12px; }
+.rt-claim { font-family: var(--display); font-size: 25px; font-weight: 600; line-height: 1.2; margin: 12px 0 6px; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.rt-meta { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+.rt-meta .s-rid { font-size: 11px; }
+
+/* ---- horizontal burn-trace panel (annotated, sibling of .run-top) ---------
+   The curve alone reads flat whenever a run finishes well under the paper's
+   estimate, which is the common case, so the panel carries the units, a key,
+   the axis top, the ceiling value at its own height and a took/predicted
+   ledger caption. Specificity beats live.css's plain .run-trace rule. */
+.run-detail .run-trace { margin: var(--s3) 0 0; padding: var(--card-pad); border-radius: var(--r-lg); }
+.tr-head { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; margin-bottom: var(--s2); }
+.tr-sub { font-family: var(--mono); font-size: var(--fs-micro); color: var(--muted); }
+/* two classes so the shared .chart-legend margin (set later in the cascade)
+   does not add a stray bottom gap inside this baseline-aligned head row */
+.tr-head .tr-key { margin: 0; font-family: var(--mono); font-size: var(--fs-micro); color: var(--muted); gap: var(--s3); }
+.tr-sw { width: 15px; height: 0; flex: none; display: inline-block; }
+.tr-sw-line { border-top: 2px solid var(--accent); }
+.tr-sw-band { width: 15px; height: 9px; border: 0; border-top: 1.5px dashed var(--predicted);
+  background: var(--predicted-tint); align-self: center; }
+.tr-sw-over { border-top: 2px solid var(--over); }
+/* the ceiling has left the plot: a run that spends a sliver of its allowance is
+   drawn on its own scale, so the key carries the ceiling and its value instead
+   of a dashed line stranded on the top edge */
+.tr-sw-off { position: relative; border-top: 1.5px dashed var(--predicted); align-self: center; }
+.tr-sw-off::after { content: "\2191"; position: absolute; right: 0; top: -10px;
+  font-size: 9px; line-height: 1; color: var(--predicted); }
+.tr-lg-off { color: var(--predicted); }
+.tr-sw-fault { width: 7px; height: 7px; border-radius: 50%; background: var(--no); align-self: center; }
+.tr-plot { position: relative; padding-left: 52px; }
+.run-detail .run-trace .trace-h { width: 100%; height: auto; display: block; }
+/* value labels ride the plot at their own height so the headroom is measured */
+.tr-y, .tr-pred-l, .tr-end-l { position: absolute; font-family: var(--mono); font-size: 9.5px;
+  color: var(--faint); pointer-events: none; white-space: nowrap; }
+.tr-y { left: 0; width: 46px; text-align: right; }
+.tr-y-max { top: 0; }
+.tr-y-zero { bottom: 0; }
+.tr-pred-l { right: 2px; transform: translateY(-130%); color: var(--predicted); font-weight: 500; }
+.tr-end-l { right: 2px; transform: translateY(-130%); color: var(--accent-strong); font-weight: 500; }
+.tr-end-l.over { color: var(--over-deep); }
+/* the x axis is labelled by rounds only. The unit belongs to the value axis, and
+   printing it centred between the two round ticks read as the x-axis label; the
+   panel head already says "cumulative H100·h across N rounds". */
+.tr-ax { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2);
+  padding-left: 52px; margin-top: 3px; font-family: var(--mono); font-size: 9.5px; color: var(--faint); }
+/* nothing metered, nothing plotted: one line, no empty plot box */
+.run-detail .run-trace.tr-flat { padding: var(--card-pad-tight); }
+.tr-flat .tr-head { margin-bottom: 0; }
+.tr-sub-2 { color: var(--faint); }
+.tr-sub-2::before { content: "· "; }
+.tr-foot { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap;
+  margin-top: var(--s3); padding-top: var(--s2); border-top: 1px solid var(--line); }
+.tr-foot .ledger { flex: 0 1 300px; }
+.tr-cap { font-family: var(--mono); font-size: var(--fs-meta); color: var(--muted); }
+.tr-cap b { color: var(--txt); font-weight: 600; }
+.tr-cap-2 { color: var(--faint); }
+.tr-cap-2::before { content: " · "; }
+.empty-trace { min-height: 74px; }
+.empty-t { font-family: var(--mono); font-size: 11px; fill: var(--faint); }
+.rd-norounds { margin-top: var(--s3); }
+
+/* ---- two-column body: rail + rounds -------------------------------------- */
+.run-body { display: grid; grid-template-columns: 76px 1fr; gap: var(--s5); margin-top: 18px; align-items: start; }
+.strip-rail { position: sticky; top: 16px; height: calc(100vh - 150px); align-self: start; }
+/* the rail is the transcript's minimap AND its scrollbar, so it says what it is
+   before it is hovered: a labelled round count, the curve, the verdict jump */
+.rail-inner { position: relative; display: flex; flex-direction: column; height: 100%; width: 100%;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow);
+  padding: 7px 3px 5px; }
+.rail-cap { flex: none; text-align: center; line-height: 1.1; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.rail-cap b { display: block; font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--txt); }
+.rail-cap span { display: block; font-family: var(--mono); font-size: 8.5px; text-transform: uppercase;
+  letter-spacing: var(--track-kicker); color: var(--muted); }
+.rail-plot { position: relative; flex: 1; min-height: 0; margin: 4px 0; }
+.rail-foot { flex: none; display: grid; place-items: center; padding-top: 5px; border-top: 1px solid var(--line); }
+.trace-v { width: 100%; height: 100%; display: block; }
+.trace-mark { cursor: pointer; transition: r .1s; }
+.trace-mark.mk-idle { opacity: .55; }
+.trace-mark:hover, .trace-mark.hover { r: 4.4; opacity: 1; }
+.trace-mark.here { r: 4.8; stroke: var(--txt); stroke-width: 1.4; opacity: 1; }
+.trace-hit { fill: transparent; cursor: pointer; }
+.rail-here { position: absolute; left: 0; right: 0; height: 0; border-top: 1.5px solid var(--accent-strong);
+  pointer-events: none; opacity: .8; }
+.rail-here::after { content: "▸"; position: absolute; left: -2px; top: -8px; color: var(--accent-strong); font-size: 11px; }
+.rail-jump { width: 26px; height: 22px; border: 1px solid var(--line-strong); background: var(--bg); color: var(--muted);
+  border-radius: var(--r-xs); font-size: 13px; line-height: 1; }
+.rail-jump:hover { border-color: var(--accent); color: var(--accent-strong); }
+.trace-ember { transform-box: fill-box; transform-origin: center; animation: ember 1.6s ease-out infinite; }
+@keyframes ember { 0% { opacity: .55; transform: scale(.7); } 70% { opacity: 0; transform: scale(2.2); } 100% { opacity: 0; transform: scale(2.2); } }
+
+/* ---- round cards ---------------------------------------------------------- */
+.rounds { display: grid; gap: var(--s2); min-width: 0; }
+.rcard { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 6px; box-shadow: var(--shadow-sm); }
+.rcard:not(.collapsed) { box-shadow: var(--shadow); }
+.rcard.final { border-color: var(--yes); box-shadow: inset 3px 0 0 var(--yes), var(--shadow); }
+.rcard.final.bad { border-color: var(--no); box-shadow: inset 3px 0 0 var(--no), var(--shadow); }
+.rcard.spike { border-color: var(--over); }
+/* a round that failed a call or was cut off keeps a coloured spine, so the
+   rounds that carry the story are findable in a long routine scroll */
+.rcard.fault { box-shadow: inset 3px 0 0 var(--no), var(--shadow-sm); }
+.rcard.flash { animation: rflash 1.4s ease-out; }
+@keyframes rflash { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: var(--shadow-sm); } }
+
+/* ---- folded runs of routine rounds --------------------------------------- */
+.rgroup { border: 1px dashed var(--line-strong); border-radius: var(--radius); background: transparent; }
+.rgroup:not(.collapsed) { background: color-mix(in srgb, var(--panel2) 45%, transparent); padding-bottom: 7px; }
+.rgroup-h { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; width: 100%; text-align: left;
+  background: none; border: 0; color: inherit; padding: 9px 13px; border-radius: var(--radius);
+  font-family: var(--mono); font-size: var(--fs-meta); color: var(--muted); transition: background .12s, color .12s; }
+.rgroup-h:hover { background: var(--panel2); color: var(--txt); }
+.rgroup-h::before { content: "▸"; font-size: 11px; width: .9em; color: var(--faint); }
+.rgroup:not(.collapsed) .rgroup-h::before { content: "▾"; }
+.rg-idx { font-weight: 600; color: var(--txt); text-transform: uppercase; letter-spacing: .04em; font-size: 11.5px; }
+.rg-n { color: var(--muted); }
+.rg-what { color: var(--faint); font-size: var(--fs-micro); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rg-cost { margin-left: auto; color: var(--faint); font-size: 11px; }
+.rgroup-body { display: grid; gap: 6px; padding: 0 7px 0; }
+.rgroup.collapsed .rgroup-body { display: none; }
+.rgroup-body .rcard { box-shadow: none; background: var(--panel); }
+/* the always-visible one-line summary header IS the collapse toggle */
+.rcard-h { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; width: 100%; text-align: left;
+  background: none; border: 0; color: inherit; padding: 10px 11px; border-radius: 9px; transition: background .12s; }
+.rcard-h:hover { background: var(--panel2); }
+.rcard-h::before { content: "▾"; color: var(--muted); font-size: 11px; width: .9em; }
+.rcard.collapsed .rcard-h::before { content: "▸"; }
+.rcard-body { padding: 4px 11px 11px; }
+.rcard.collapsed .rcard-body { display: none; }
+.rcard-h .r-idx { font-family: var(--mono); font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.rcard.final .r-idx { color: var(--yes-deep); }
+/* the final round's mark is typographic and tinted, like ● ◐ ✕ ▸ ↓ everywhere
+   else on the page; a full-colour emoji was the one unthemed glyph on the site */
+.r-idx .r-fin { font-style: normal; color: var(--yes); margin-right: 2px; }
+.r-cost { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.rcard-h .ftime { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+.r-tally { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+.r-fault { font-family: var(--mono); font-size: 10.5px; font-weight: 600; color: var(--no-deep); }
+/* the collapsed row's middle: the first command the round ran. It takes the
+   slack between the round id and the cost chip, and ellipsises rather than
+   wrapping, so 40 consecutive rows stay one line each and still differ. */
+.r-what { flex: 1 1 90px; min-width: 0; font-family: var(--mono); font-size: 10.5px; color: var(--faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* an open card prints the same content underneath, so the gist is the collapsed
+   row's job only */
+.rcard:not(.collapsed) .r-what { display: none; }
+
+.block { margin: 9px 0 0; }
+.block.flat { background: var(--panel2); border: 1px solid var(--line); border-radius: 9px; padding: 9px 12px; }
+.block-l { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
+.rprose { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--txt); white-space: pre-wrap; word-break: break-word; }
+/* a reading measure on a round's own prose; the tool-call panes below keep the
+   full column because a command or a log line must not be re-wrapped short */
+.rcard .block.flat .rprose { max-width: var(--measure); }
+
+/* ---- the agent's own markdown --------------------------------------------
+   Models write the final report in markdown, and printing it raw put "## Summary",
+   "**24.59**" and a whole ```json body through the prose renderer. render_round.js
+   escapes first and then renders headings, bold, inline code and fenced blocks;
+   these are the only four things it emits. */
+.rmd > * { margin: 0; }
+.rmd > * + * { margin-top: 9px; }
+.rmd > * + .rhead { margin-top: 15px; }
+.rmd > .rhead + * { margin-top: 5px; }
+.rhead { font-family: var(--display); font-size: 15px; font-weight: 700; line-height: 1.3;
+  letter-spacing: -.005em; color: var(--txt); }
+.rmd code.rcode-i { font-family: var(--mono); font-size: 12px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: var(--r-xs); padding: 0 4px; }
+.rmd .rprose strong { font-weight: 600; color: var(--txt); }
+/* a fenced block is code: monospaced, unwrapped, scrolling in its own box */
+.rcode-w { position: relative; background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--r-sm); }
+.rcode-l { position: absolute; top: 0; right: 0; padding: 3px 8px; font-family: var(--mono);
+  font-size: 9.5px; letter-spacing: var(--track-kicker); text-transform: uppercase; color: var(--faint); }
+pre.rcode { margin: 0; padding: 10px 12px; font-family: var(--mono); font-size: 11.5px; line-height: 1.55;
+  color: var(--txt); white-space: pre; overflow: auto; max-height: 340px; }
+
+/* tool calls */
+.call { margin: 11px 0 0; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.call-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 7px 12px; background: var(--panel2); border-bottom: 1px solid var(--line); }
+.call-h .tool { font-family: var(--mono); font-weight: 600; font-size: 12.5px; }
+.call-h .tool::before { content: "⏺ "; color: var(--accent); }
+.call-body { padding: 10px 12px; display: grid; gap: 8px; }
+.cmd { margin: 0; font-family: var(--mono); font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+  background: var(--panel2); border: 1px solid var(--line); border-radius: 7px; padding: 9px 11px; color: var(--txt); max-height: 260px; overflow: auto; }
+.cmd::before { content: "$ "; color: var(--accent-strong); }
+.cmd.path::before, .cmd.diff::before { content: ""; }
+.result { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.schip.cost { color: var(--over-deep); border-color: var(--over); background: var(--over-tint); }
+.err { color: var(--no-deep); font-size: 12px; font-family: var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; background: var(--no-tint); border: 1px solid var(--no); border-radius: 7px; padding: 7px 10px; }
+.err::before { content: "! "; }
+
+.collapse details { border: 1px solid var(--line); border-radius: 7px; background: var(--panel); }
+.collapse summary { padding: 7px 11px; cursor: pointer; color: var(--muted); font-family: var(--mono); font-size: 11.5px; list-style: none; }
+.collapse summary::-webkit-details-marker { display: none; }
+.collapse summary::before { content: "▸ "; }
+.collapse details[open] summary::before { content: "▾ "; }
+.collapse summary:hover { color: var(--txt); }
+.stream { margin: 0; padding: 9px 12px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; max-height: 360px; overflow: auto; }
+.stream.errt { color: var(--no-deep); background: var(--no-tint); }
+.trunc { font-size: 11px; color: var(--over-deep); background: var(--over-tint); border: 1px solid var(--over); border-radius: 7px; padding: 5px 9px; }
+
+/* verdict cap on the FINAL round */
+.verdict-cap { margin-top: 11px; padding: 10px 13px; border-radius: 9px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: var(--panel2); border: 1px dashed var(--line-strong); font-family: var(--mono); font-size: 12px; }
+.verdict-cap.reproduced { background: var(--yes-tint); border-color: var(--yes); }
+.verdict-cap.fault { background: var(--no-tint); border-color: var(--no); }
+.verdict-cap.miss { background: var(--over-tint); border-color: var(--over); }
+.vc-bal { color: var(--muted); } .vc-bal b { color: var(--txt); }
+
+/* json tree (tool-call args) */
+.jraw { font-family: var(--mono); font-size: 11.5px; line-height: 1.7; padding: 2px; overflow-x: auto; }
+.jchildren { padding-left: 1.25em; border-left: 1px solid var(--line); margin-left: .4em; }
+.jline { white-space: pre-wrap; word-break: break-word; }
+.jhead { cursor: pointer; border-radius: 6px; transition: background .12s; }
+.jhead:hover { background: var(--panel2); }
+.jtoggle { display: inline-block; width: 1.1em; color: var(--muted); user-select: none; text-align: center; }
+.branch > .jhead > .jtoggle::before { content: "▾"; }
+.jnode.collapsed > .jhead > .jtoggle::before { content: "▸"; }
+.jnode.collapsed > .jchildren, .jnode.collapsed > .jclose { display: none; }
+.jpreview { display: none; color: var(--muted); }
+.jnode.collapsed > .jhead .jpreview { display: inline; }
+.jcount { color: var(--muted); font-size: 11px; font-style: italic; }
+.jkey { color: var(--accent-strong); font-weight: 500; }
+.jpunc, .jbrace { color: var(--muted); }
+.jstr, .jnum { color: var(--txt); }
+.jbool { color: var(--over-deep); font-weight: 600; }
+.jnull { color: var(--muted); font-style: italic; }
+/* a URL inside a tool call's arguments reads as a link. The .jstr rule above
+   outranks the global a{} colour, so the link needs its own rule here. */
+a.jlink, .jstr.jlink { color: var(--accent-strong); text-decoration: underline;
+  text-decoration-style: dotted; text-underline-offset: 2px; }
+a.jlink:hover { text-decoration-style: solid; background: var(--accent-tint); border-radius: 3px; }
+
+/* ---- round-list controls -------------------------------------------------- */
+.rounds-ctl .rc-note { margin-right: auto; font-family: var(--mono); font-size: var(--fs-micro); color: var(--faint); }
+
+@media (max-width: 1000px) {
+  .run-body { grid-template-columns: 1fr; gap: var(--s3); }
+  .strip-rail { display: none; }
+  .tr-key { margin-left: 0; width: 100%; }
+  .tr-foot { flex-direction: column; align-items: stretch; gap: var(--s2); }
+  .tr-foot .ledger { flex: none; }
+}

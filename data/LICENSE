@@ -1,0 +1,13 @@
+# Data license
+
+The dataset splits under `data/splits/` and the run records under `runs/` are
+released under the Creative Commons Attribution 4.0 International License
+(CC BY 4.0): https://creativecommons.org/licenses/by/4.0/
+
+Attribution: RECLAIM Authors.
+
+The run records contain model-generated transcripts and grader output.
+
+The papers and artifacts the splits point at remain under their own licenses.
+
+The code in this repository is covered separately by `LICENSE`.

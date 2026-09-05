@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use RECLAIM, please cite it as below."
+title: "RECLAIM: Can Agents Reproduce the Claims of Machine Learning Papers?"
+abstract: "A benchmark of 100 machine learning papers that measures whether an autonomous agent can reproduce a paper's central empirical claim from the artifacts its authors released, under a metered GPU budget and a pinned evidence audit."
+authors:
+  - name: "RECLAIM Authors"
+type: software
+license: MIT
+year: 2026
+date-released: "2026-09-05"
+repository-code: "https://anonymous.4open.science/r/reclaim-5733"
+url: "https://reclaim-traces.vercel.app"
+keywords:
+  - reproducibility
+  - benchmark
+  - autonomous agents
+  - machine learning
+preferred-citation:
+  type: unpublished
+  title: "RECLAIM: Can Agents Reproduce the Claims of Machine Learning Papers?"
+  authors:
+    - name: "RECLAIM Authors"
+  year: 2026
+  notes: "Under review"

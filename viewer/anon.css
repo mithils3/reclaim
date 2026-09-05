@@ -1,0 +1,380 @@
+/* anon.css: the composition layer. styles.css hands down the tokens; this file
+   turns them into the parts every page is assembled from — the app shell, the
+   top bar and the filter bar, one card anatomy, one chip family, the overview
+   hero band, the clickable agent x tier matrix, the bounded data-table pane with
+   a sticky head, and the responsive rules. It loads after every page stylesheet,
+   so a rule here is the final word on a shared class.
+
+   Three invariants:
+     1. every gap is a step on the --s1..--s7 scale
+     2. every card is surface + 1px --line + --r-lg + --card-pad, headed by a
+        mono uppercase kicker (.plate)
+     3. no card is ever stretched taller than its own content — a short row and a
+        tall card never share a grid row unless the short side is given more to
+        say. */
+
+/* ---- app shell ----------------------------------------------------------- */
+html, body { overflow-x: hidden; }
+.app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+.topbar { flex: none; }
+main.view { flex: 1; min-height: 0; display: flex; }
+.detail { flex: 1; min-width: 0; }
+
+/* ONE content measure for every view. overview.css and live.css each grew their
+   own wider zone for the list pages (1240px and 1340px against the shared
+   1180px), so switching tabs walked the page's left edge by 80px. Both are
+   folded back into --content-max here; the ten-column runs grid earns its width
+   by scrolling inside its own pane instead of widening the page. */
+.detail > *,
+.detail > .wide-list,
+#view-papers .detail > *,
+#view-papers .detail > .wide-list,
+#view-stats .detail > .stats-wrap {
+  width: 100%; max-width: var(--content-max); margin-inline: auto; }
+
+/* brand: mark, name, sub-line, run count */
+.brand .b-name b { color: var(--accent-strong); }
+.brand .b-sub { font-family: var(--sans); font-size: 11px; font-weight: 500; color: var(--muted);
+  padding-left: var(--s3); border-left: 1px solid var(--line-strong); white-space: nowrap; }
+
+/* ---- global filter bar ---------------------------------------------------- */
+/* the selects read as compact chips, the tier's meaning rides after them, and
+   reset sits at the far right, so the bar has a fixed left block and a fixed end */
+.filterbar { flex: none; display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap;
+  min-height: var(--filterbar-h); padding: 6px var(--page-pad);
+  border-bottom: 1px solid var(--line); background: var(--bg-side); }
+.filterbar.hidden { display: none !important; }
+.fb-l { font-family: var(--mono); font-size: var(--fs-kicker); text-transform: uppercase;
+  letter-spacing: var(--track-kicker); color: var(--muted); font-weight: 600; }
+.fb-l + .fb-sel { margin-right: var(--s2); }
+.fb-what { font-family: var(--mono); font-size: 11px; color: var(--muted);
+  padding-left: var(--s3); border-left: 1px solid var(--line-strong); }
+.fb-what:empty { display: none; }
+.fb-reset { margin-left: auto; }
+/* About filters nothing, but dropping the bar there moved every heading on the
+   site 44px up and back down on the next tab. The bar keeps its height and
+   states the collection in one dim mono line; the controls step out. */
+.fb-note { display: none; font-family: var(--mono); font-size: 12px; color: var(--faint); }
+.filterbar.fb-static > *:not(.fb-note) { display: none; }
+/* the line takes a select's own box — same font, same padding, a transparent
+   border — so the bar is exactly as tall with the controls as without it and
+   the heading under it does not move a pixel between tabs */
+.filterbar.fb-static .fb-note { display: inline-block; padding: 4px 0; border: 1px solid transparent; }
+
+/* one select treatment for the filter bar and the per-page filter rows */
+.fb-sel, .ps-filters select, .ov-actions select {
+  font: inherit; font-family: var(--mono); font-size: 12px; font-weight: 500;
+  appearance: none; -webkit-appearance: none;
+  padding: 4px 26px 4px 10px; border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  background-color: var(--panel); color: var(--txt); cursor: pointer;
+  background-image: var(--chev); background-repeat: no-repeat;
+  background-position: right 9px center; background-size: 9px 6px;
+  transition: border-color .14s, background-color .14s; }
+.fb-sel:hover, .ps-filters select:hover, .ov-actions select:hover { border-color: var(--muted); }
+.fb-sel:focus, .ps-filters select:focus, .ov-actions select:focus,
+.s-search:focus { outline: none; border-color: var(--accent); box-shadow: var(--ring); }
+.s-search { min-width: 268px; font-family: var(--mono); font-size: 12px; padding: 5px 11px;
+  border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--panel); color: var(--txt); }
+.s-search::placeholder { color: var(--faint); }
+
+/* ---- page head band ------------------------------------------------------- */
+/* title and one line of description, then straight into content */
+.ov-head { margin-bottom: var(--s3); }
+.ov-head h1 { font-size: 27px; letter-spacing: -.015em; }
+.ov-sub { font-size: 13px; color: var(--muted); margin-top: var(--s1); max-width: 940px; line-height: 1.5; }
+
+/* ---- card anatomy --------------------------------------------------------- */
+/* one surface, one border, one radius, one padding; the kicker heads it */
+.panel-card, .chart-card, .about-card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg);
+  box-shadow: var(--shadow); padding: var(--card-pad); }
+.pc-head, .chart-h { display: flex; align-items: baseline; gap: var(--s3); margin-bottom: var(--s3); }
+.chart-h { margin-bottom: var(--s2); }
+.plate { font-family: var(--mono); font-size: var(--fs-kicker); text-transform: uppercase;
+  letter-spacing: var(--track-kicker); color: var(--muted); font-weight: 600; }
+.chart-t { font-family: var(--display); font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.chart-s, .lc-sub { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+
+/* ---- overview hero -------------------------------------------------------- */
+/* the gauge holds one column; the stat strip and the tier legend stack in the
+   other, so the tall card is matched by content instead of by empty stretch */
+.ov-hero {
+  display: grid; grid-template-columns: 208px minmax(0, 1fr);
+  grid-template-areas: "gauge stats" "gauge tiers";
+  grid-template-rows: auto 1fr; gap: var(--s3); margin: 0 0 var(--s4); }
+.ov-gauge { grid-area: gauge; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: var(--s1); text-align: center; }
+.ov-gauge .arc-gauge { width: 142px; }
+.ov-stats { grid-area: stats; padding: 0; overflow: hidden;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ov-tierdefs { grid-area: tiers; padding: 0; overflow: hidden;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.ov-stat { padding: 13px 16px; border-left: 1px solid var(--line); min-width: 0; }
+.ov-stat:first-child, .ov-tierdef:first-child { border-left: 0; }
+.ovs-l { font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: var(--track-kicker); color: var(--muted); font-weight: 600; }
+.ovs-v { font-family: var(--display); font-size: 30px; font-weight: 700; line-height: 1.05;
+  margin-top: 3px; color: var(--txt); font-variant-numeric: tabular-nums; }
+.ovs-s { font-family: var(--mono); font-size: var(--fs-micro); color: var(--muted); margin-top: 3px; }
+.ov-stat.yes .ovs-v { color: var(--yes-deep); }
+.ov-stat.accent .ovs-v { color: var(--accent-strong); }
+
+.ov-tierdef { padding: 11px 16px; border-left: 1px solid var(--line); min-width: 0;
+  display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: flex-start; }
+.ov-tierdef .badge { align-self: flex-start; }
+.ovtd-what { font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+
+/* the gauge caption, tightened */
+.gauge-cap b { font-family: var(--display); font-size: 13px; }
+.gauge-cap span { display: block; font-family: var(--mono); font-size: var(--fs-micro);
+  color: var(--muted); margin-top: 3px; line-height: 1.45; }
+
+.ov-grid { margin-top: var(--s3); }
+.grid2 { gap: var(--s3); margin-bottom: var(--s4); }
+.ov-compute { margin-bottom: var(--s5); }
+.ov-compute .bar-label { text-transform: none; }
+
+/* ---- agent x tier matrix -------------------------------------------------- */
+.matrix.mt-big td, .matrix.mt-big th { padding: 9px 10px; }
+.mt-cell.live { cursor: pointer; border-radius: var(--r-md); transition: background .12s, box-shadow .12s; }
+.mt-cell.live:hover, .mt-cell.live:focus-visible {
+  background: var(--panel2); box-shadow: inset 0 0 0 1px var(--accent); outline: none; }
+.mt-mean { display: block; font-family: var(--display); font-size: 21px; font-weight: 700;
+  line-height: 1.1; color: var(--txt); font-variant-numeric: tabular-nums; }
+.mt-cell .mt-frac { font-size: var(--fs-micro); color: var(--muted); margin-top: 2px; }
+/* the share bar carries the same weight as the number above it: a hairline read
+   as noise, and a nonzero share never collapses to an invisible sliver */
+.matrix.mt-big .mt-bar { height: 8px; border-radius: var(--r-xs); margin: 7px auto 0;
+  max-width: 250px; background: var(--panel2); border: 1px solid var(--line); overflow: hidden; }
+.matrix.mt-big .mt-bar i { border-radius: 4px; min-width: 4px; background: var(--yes); }
+.mt-tier { padding-bottom: var(--s3) !important; }
+.mt-cell.empty { color: var(--faint); }
+.mt-cell.off { opacity: .42; }
+.mt-model { font-size: var(--fs-meta); }
+
+/* ---- charts --------------------------------------------------------------- */
+.chart-legend { display: flex; flex-wrap: wrap; gap: var(--s3); row-gap: 5px; margin: 2px 0 var(--s3);
+  font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+.chart-legend .lg { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex: none; }
+.bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chart-card .bars { margin-top: var(--s2); }
+.bar-track { border: 1px solid var(--line); }
+/* a mode with a handful of runs still has to be visible inside the stack */
+.bar-track .seg { min-width: 3px; }
+.hgram { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 5px; align-items: end;
+  height: 168px; margin-top: var(--s2); }
+.hg-col { display: grid; grid-template-rows: 14px 1fr 16px; height: 100%; }
+.hg-n { font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: center; }
+.hg-bar { display: flex; align-items: flex-end; justify-content: center; border-bottom: 1px solid var(--line); }
+.hg-bar i { display: block; width: 100%; border-radius: 4px 4px 0 0; min-height: 2px; }
+.hg-k { font-family: var(--mono); font-size: var(--fs-micro); color: var(--muted); text-align: center; padding-top: 3px; }
+
+/* ---- wide content scrolls in its own box ---------------------------------- */
+/* a round card is a grid item, so it grows to its widest child unless told
+   otherwise; a long evidence path stays on one line and gets an ellipsis */
+.rounds > * { min-width: 0; }
+.rcard .schip { display: inline-block; max-width: 100%; overflow: hidden;
+  text-overflow: ellipsis; vertical-align: bottom; }
+
+/* horizontal scroll with an edge shadow, so a cut-off column announces itself */
+.tscroll { --tsc-bg: var(--panel); overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch;
+  background:
+    linear-gradient(to right, var(--tsc-bg), transparent) 0 0 / 28px 100% no-repeat local,
+    linear-gradient(to left, var(--tsc-bg), transparent) 100% 0 / 28px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, var(--edge-shadow), transparent) 0 0 / 14px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, var(--edge-shadow), transparent) 100% 0 / 14px 100% no-repeat scroll,
+    var(--tsc-bg); }
+.tscroll > table { min-width: 720px; }
+
+/* a long data table is a pane, not a page: bounded height gives the sticky head
+   a real scroll container to stick to, and frames the rows as one card */
+.tscroll.tpane, .tscroll:has(> table.stats-table) {
+  overflow: auto; overscroll-behavior: contain;
+  max-height: calc(100dvh - var(--topbar-h) - var(--filterbar-h) - 176px); min-height: 340px;
+  border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow); }
+.tpane > table, .tscroll:has(> table.stats-table) > table { min-width: 900px; }
+.tpane .stats-table thead th, .tscroll:has(> table.stats-table) thead th {
+  background: var(--panel); border-bottom: 1px solid var(--line-strong); padding-top: 10px; padding-bottom: 10px; }
+.stats-table tbody tr:hover { background: var(--panel2); }
+.stats-table tbody tr:last-child td { border-bottom: 0; }
+/* the paper id is a cell here, not a line inside one, so it keeps cell layout:
+   a block td would drop out of the row and leave a dead strip across it */
+.stats-table td.s-rid { display: table-cell; vertical-align: middle; margin: 0; }
+
+/* ---- runs table ----------------------------------------------------------- */
+/* ten columns want 1312px at their minimums and the shared measure is 1280, so
+   the cell padding and the claim floor each give back a little. The table then
+   fits whole on a desktop and still scrolls inside its pane below that, rather
+   than the page widening under it. */
+.runs-table th, .runs-table td { padding: 8px 8px; }
+.runs-table .pl-claim-cell { min-width: 238px; max-width: 400px; }
+/* the claim is the widest thing in the row, so it is clamped to two lines; every
+   other cell then sits in a row of one predictable height */
+.runs-table .pcell-claim { display: -webkit-inline-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; vertical-align: top; line-height: 1.4; max-width: calc(100% - 24px); }
+.pl-claim-cell .vg { margin-right: var(--s2); vertical-align: top; }
+.runs-table .fuel-cell { min-width: 148px; }
+.runs-table .fuel-cell .mfuel { min-width: 138px; gap: 6px; }
+.runs-table .s-model { font-size: var(--fs-meta); }
+.runs-table td.num .an-score { margin-left: 0; }
+.s-rid { display: inline-block; margin-top: 0; }
+
+/* ---- papers outcome grid --------------------------------------------------- */
+.papers-table .pm-head { text-align: center; }
+.pm-cell { text-align: center; }
+.pm-cell.empty { color: var(--faint); }
+.pm-chip { font-family: var(--display); font-weight: 700; font-size: 13px; min-width: 34px;
+  padding: 3px 8px; border-radius: var(--r-sm); border: 1px solid var(--line-strong);
+  background: var(--panel2); color: var(--muted); transition: transform .1s, box-shadow .1s; }
+.pm-chip.reproduced { color: var(--yes-deep); border-color: var(--yes); background: var(--yes-tint); }
+.pm-chip.miss { color: var(--over-deep); border-color: var(--over); background: var(--over-tint); }
+.pm-chip.fault { color: var(--no-deep); border-color: var(--no); background: var(--no-tint); }
+.pm-chip:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.pm-legend { margin-left: auto; display: flex; gap: var(--s3); flex-wrap: wrap; font-size: 11px; color: var(--muted); }
+.pm-chip.sw-chip { min-width: 0; padding: 0 6px; font-size: 11px; pointer-events: none; }
+.papers-table .pcell-claim { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden; line-height: 1.45; }
+.ps-head { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; margin-bottom: var(--s3); }
+.ps-filters { margin-left: auto; display: flex; gap: var(--s2); flex-wrap: wrap; align-items: center; }
+
+/* ---- run page -------------------------------------------------------------- */
+.rd-nav { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
+.rd-nav .crumb { margin-bottom: 0; }
+.rd-nav-r { margin-left: auto; display: flex; align-items: center; gap: var(--s2); }
+.rd-pos { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.filt[disabled] { opacity: .4; cursor: default; }
+.rd-head { margin: var(--s4) 0 6px; }
+.rd-head .rt-head { row-gap: var(--s2); }
+.rt-head .an-score { margin-left: 0; }
+.rt-meta .pid { font-size: 12px; }
+/* second header line: the structured match target, when the record carries one */
+.rt-target { font-family: var(--mono); font-size: 12px; color: var(--txt); margin: 0 0 var(--s2);
+  display: flex; gap: var(--s2); align-items: baseline; flex-wrap: wrap; }
+.rt-target-l { font-size: 10px; letter-spacing: var(--track-kicker); color: var(--muted); font-weight: 600; }
+.rt-target-v { overflow-wrap: anywhere; }
+
+.rd-audit { margin: var(--s4) 0 0; }
+.rd-audit-head { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; margin-bottom: var(--s3); }
+.rd-audit-body { margin-bottom: var(--s3); }
+.rd-audit-body .block-l, .rd-dissect .block-l { margin-bottom: 5px; }
+.rd-dissect .rprose + .block-l { margin-top: var(--s4); }
+.rd-flags { display: grid; gap: 9px; }
+.rd-dissect { margin-top: var(--s3); }
+.rd-dissect + .an-sec, .an-sec + .an-sec { margin-top: var(--s3); }
+
+.rd-tabs { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; margin: var(--s5) 0 var(--s3); }
+.rd-tabs-r { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+.rd-tab.active { background: var(--txt); color: var(--bg); border-color: var(--txt); }
+
+/* evidence quote round link doubles as a jump into the transcript; a quote that
+   names no round in this transcript keeps the column but carries no link */
+.an-q-round { background: none; border: 0; text-align: left; cursor: pointer; }
+.an-q-round:hover { text-decoration: underline; }
+.an-q-noround { display: block; }
+.rcard.flash { box-shadow: 0 0 0 2px var(--accent), var(--shadow); }
+
+/* ---- about ------------------------------------------------------------------ */
+/* Two hand-packed columns, not auto-placement. A row-filling grid put the 403px
+   "how a run is graded" plate opposite a 137px one, so the right column died
+   ~490px above the left and the bottom-right quarter of the page was empty. The
+   columns are explicit instead: left is what the benchmark is and what you are
+   looking at, right is how it was graded, and the two run to within ~50px of the
+   same depth. Both start at the same y — .an-sec + .an-sec is neutralised here,
+   or the second plate would sit 12px lower than the first. */
+.about-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s3); align-items: start; }
+.about-col { display: grid; gap: var(--s3); align-content: start; min-width: 0; }
+.about-card, .about-grid .an-sec + .an-sec { margin: 0; max-width: none; }
+.about-card .rprose { margin: 0 0 var(--s3); font-size: var(--fs-body); line-height: 1.6; }
+.about-card .rprose:last-child { margin-bottom: 0; }
+.about-list { margin: var(--s1) 0 var(--s3); padding-left: 20px; display: grid; gap: 7px;
+  font-size: var(--fs-body); line-height: 1.55; }
+.about-list:last-child { margin-bottom: 0; }
+.about-card code { font-family: var(--mono); font-size: 12px; background: var(--panel2);
+  border: 1px solid var(--line); border-radius: var(--r-xs); padding: 1px 5px; }
+
+/* ---- vocabulary: tiers, failure modes ------------------------------------- */
+/* the failure-mode pill: fixed colour dot + display name, identical in the
+   legend, the runs table, the papers page and the run header */
+.mchip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px;
+  line-height: 1.35; padding: 2px 9px; border-radius: var(--r-xs); border: 1px solid var(--line-strong);
+  background: var(--panel2); color: var(--txt); max-width: 100%; }
+.mchip::before { content: ""; width: 7px; height: 7px; border-radius: 2px; flex: none;
+  background: var(--mc, var(--slate)); }
+.mchip .mchip-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+/* in a table the pill is one line: a two-line pill is a third source of row
+   height variance. The full name rides on the cell's title attribute. */
+.runs-table .mode-cell, .papers-table .mode-cell { max-width: 186px; }
+.runs-table .mode-cell .mchip, .papers-table .mode-cell .mchip { max-width: 100%; white-space: nowrap; overflow: hidden; }
+
+/* budget row: one group per tier, reproduced against the rest */
+.cmp-group { margin-bottom: var(--s3); }
+.cmp-group:last-child { margin-bottom: 0; }
+.cmp-tier { display: flex; align-items: baseline; gap: var(--s2); flex-wrap: wrap; margin-bottom: 6px; }
+.cmp-what { font-family: var(--mono); font-size: var(--fs-micro); color: var(--muted); }
+
+/* run page: the mode, its definition and the recorded label when it is Other */
+.rd-mode { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; margin-bottom: var(--s3); }
+.rd-mode-def { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.rd-slug { font-family: var(--mono); font-size: var(--fs-micro); color: var(--muted); }
+.rd-self { margin: var(--s3) 0 0; font-size: 13px; line-height: 1.6; color: var(--txt); }
+.rd-self-l { font-family: var(--mono); font-size: 11.5px; color: var(--muted); font-weight: 600; margin-right: var(--s1); }
+.rd-dissect .an-quotes { margin-top: var(--s1); }
+
+/* papers: the gist under the claim, and the columns the agent filter steps back */
+.papers-table .pm-head.dim, .papers-table .pm-cell.dim { opacity: .38; }
+
+/* ---- responsive -------------------------------------------------------------- */
+@media (max-width: 1080px) {
+  .ov-hero { grid-template-columns: 1fr; grid-template-areas: "gauge" "stats" "tiers";
+    grid-template-rows: auto auto auto; }
+  .ov-gauge { flex-direction: row; gap: var(--s5); text-align: left; }
+  .ov-gauge .arc-gauge { width: 124px; }
+  .grid2 { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .ov-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ov-stat:nth-child(3) { border-left: 0; }
+  .ov-stat:nth-child(n + 3) { border-top: 1px solid var(--line); }
+  .ov-tierdefs { grid-template-columns: 1fr; }
+  .ov-tierdef { border-left: 0; }
+  .ov-tierdef + .ov-tierdef { border-top: 1px solid var(--line); }
+  /* below ~900px a 400px card column is no longer a column, it is a squeeze */
+  .about-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  :root { --page-pad: 14px; }
+  .topbar { gap: var(--s2); padding: 8px var(--page-pad); flex-wrap: wrap; row-gap: 6px; }
+  /* keep the theme toggle on the brand's row and let the tabs take the next one,
+     rather than spending a whole row on one small button */
+  .brand { order: 1; } .who { order: 2; } .tabs { order: 3; flex: 1 0 100%; flex-wrap: wrap; }
+  .brand .b-sub { display: none; }
+  .tab { padding: 5px 10px; font-size: 12.5px; }
+  .filterbar { padding: 6px var(--page-pad); }
+  .detail { padding: var(--s4) var(--page-pad) 64px; }
+  .ov-head h1 { font-size: 21px; }
+  .rt-claim { font-size: 20px; }
+  .spec-claim { font-size: 21px; }
+  /* a title that wraps must not orphan its subtitle beside the first line */
+  .pc-head, .chart-h { flex-direction: column; align-items: flex-start; gap: 3px; }
+  .bar-row { grid-template-columns: 92px 1fr auto; gap: 7px; }
+  .bar-label { font-size: 11px; }
+  .hgram { height: 148px; }
+  .hg-k { font-size: 9.5px; }
+  .ps-filters { margin-left: 0; width: 100%; }
+  .ps-filters select, .s-search { flex: 1 1 130px; min-width: 0; }
+  .pm-legend { margin-left: 0; width: 100%; }
+  .rd-nav-r, .rd-tabs-r { margin-left: 0; }
+  .itiles { gap: 7px; }
+  .itile { flex: 1 1 44%; padding: 8px 10px; }
+  .about-grid { grid-template-columns: 1fr; }
+  .about-card { padding: var(--card-pad-tight); }
+  .tscroll.tpane, .tscroll:has(> table.stats-table) { max-height: none; min-height: 0; }
+}
+@media (max-width: 420px) {
+  :root { --page-pad: 10px; }
+  .tscroll > table { min-width: 560px; }
+  .detail { padding: var(--s3) var(--page-pad) 56px; }
+}

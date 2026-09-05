@@ -1,0 +1,8 @@
+extend-exclude = [
+    "data",
+    "runs",
+    "viewer",
+]
+
+[lint]
+select = ["E9", "F"]

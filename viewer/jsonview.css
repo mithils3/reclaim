@@ -1,0 +1,100 @@
+/* jsonview.css: cards for the machine-JSON that closes a run or an audit. The
+   audit verdict wears a score dial + a measured-vs-reference comparison strip
+   that turns green/coral by the op/tolerance test; the agent self-report wears
+   an assessment badge + a measurements table. Both fall back to a JSON tree and
+   a raw-json <details>. Instrument look reused from viewer.css; every colour is
+   a styles.css token, so dark mode (theme.css) comes for free. */
+
+.jv-block { padding: 12px 13px; }
+.jv-block .block-l { margin-bottom: 8px; }
+
+/* ---- head row (score dial / assessment badge + chips) -------------------- */
+.jv-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 11px; }
+.jv-score { font-family: var(--display); font-size: 30px; font-weight: 700; line-height: 1; letter-spacing: -.02em; }
+.jv-score i { font-size: 13px; font-style: normal; font-weight: 500; color: var(--muted); margin-left: 1px; }
+.jv-score.yes { color: var(--yes-deep); }
+.jv-score.over { color: var(--over-deep); }
+.jv-score.no { color: var(--no-deep); }
+.jv-selfnote { font-family: var(--mono); font-size: 11px; color: var(--muted); font-style: italic; }
+
+/* ---- claim --------------------------------------------------------------- */
+.jv-claim { font-family: var(--display); font-size: 15.5px; font-weight: 500; line-height: 1.45; color: var(--txt); margin: 0 0 12px; }
+
+/* ---- measured vs reference comparison strip ------------------------------
+   The recorded values are often sentences rather than numbers, and a reference
+   is absent on roughly a third of verdicts. So the grid carries only the cells
+   that hold a value (cols-1/2/3), a numeric value gets the Fraunces display
+   treatment while a stated one drops to mono at reading size, and a match bar
+   written as a whole sentence prints on its own rule line under the strip. */
+.jv-metric { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; margin-bottom: 5px; }
+.jv-compare { display: grid; align-items: center; text-align: center;
+  border: 1px solid var(--line-strong); border-radius: var(--r-md); overflow: hidden; background: var(--panel2); }
+.jv-compare.cols-3 { grid-template-columns: 1fr 1.15fr 1fr; }
+.jv-compare.cols-2 { grid-template-columns: 1fr 1fr; }
+.jv-compare.cols-1 { grid-template-columns: 1fr; text-align: left; }
+.jv-compare.pass { background: var(--yes-tint); border-color: var(--yes); }
+.jv-compare.fail { background: var(--no-tint); border-color: var(--no); }
+.jv-cell { padding: 11px 13px; min-width: 0; }
+.jv-cv { color: var(--txt); overflow-wrap: anywhere; }
+.jv-cv.num { font-family: var(--display); font-size: 22px; font-weight: 600; line-height: 1.15; }
+.jv-cv.txt { font-family: var(--mono); font-size: 12px; font-weight: 500; line-height: 1.5; text-align: left;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.jv-cl { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 4px; }
+.jv-compare.cols-1 .jv-cl, .jv-cv.txt + .jv-cl { text-align: left; }
+.jv-rel { padding: 8px 10px; border-inline: 1px solid var(--line); font-family: var(--mono); }
+.jv-op { font-size: 11.5px; color: var(--muted); }
+.jv-delta { font-size: 12.5px; color: var(--txt); font-weight: 600; margin-top: 3px; }
+.jv-tag { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; margin-top: 3px; }
+.jv-compare.pass .jv-tag, .jv-rule.pass .jv-tag { color: var(--yes-deep); }
+.jv-compare.fail .jv-tag, .jv-rule.fail .jv-tag { color: var(--no-deep); }
+/* the match bar stated as a sentence */
+.jv-rule { display: flex; align-items: baseline; gap: var(--s2); flex-wrap: wrap; margin-top: 7px;
+  padding: 8px 12px; border: 1px solid var(--line); border-left: 3px solid var(--line-strong);
+  border-radius: var(--r-sm); background: var(--panel2); }
+.jv-rule.pass { border-color: var(--yes); border-left-color: var(--yes); background: var(--yes-tint); }
+.jv-rule.fail { border-color: var(--no); border-left-color: var(--no); background: var(--no-tint); }
+.jv-rule-l { flex: none; font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+.jv-rule-t { flex: 1 1 260px; min-width: 0; font-family: var(--mono); font-size: 11.5px; line-height: 1.5; color: var(--txt); overflow-wrap: anywhere; }
+.jv-rule .jv-delta, .jv-rule .jv-tag { margin-top: 0; }
+.jv-scope { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+/* ---- integrity flags (rendered by JsonView.flagsHtml, styled in analysis.css) */
+.jv-flags-l { margin: 13px 0 6px; }
+.jv-flags { display: grid; gap: 8px; margin-bottom: 12px; }
+
+/* ---- prose sections: replicate the .collapse details look (not nested) --- */
+.jv-sec { border: 1px solid var(--line); border-radius: 7px; background: var(--panel); margin-top: 8px; }
+.jv-sec > summary { padding: 7px 11px; cursor: pointer; color: var(--muted); font-family: var(--mono); font-size: 11.5px;
+  list-style: none; text-transform: uppercase; letter-spacing: .05em; }
+.jv-sec > summary::-webkit-details-marker { display: none; }
+.jv-sec > summary::before { content: "▸ "; }
+.jv-sec[open] > summary::before { content: "▾ "; }
+.jv-sec > summary:hover { color: var(--txt); }
+.jv-sec .rprose { padding: 4px 12px 11px; }
+.jv-blockers > summary { background: var(--no-tint); color: var(--no-deep); }
+
+/* ---- self-report extras -------------------------------------------------- */
+.jv-ml { margin-top: 10px; }
+.jv-ml .cmd { margin-top: 4px; }
+.jv-files { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---- measurements table -------------------------------------------------- */
+.jv-tscroll { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+.jv-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 4px 0 6px; }
+.jv-table th { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+  font-weight: 600; text-align: left; padding: 5px 9px; border-bottom: 1px solid var(--line-strong); }
+.jv-table td { padding: 6px 9px; border-bottom: 1px solid var(--line); vertical-align: top; font-variant-numeric: tabular-nums; }
+.jv-table td b { color: var(--txt); }
+.jv-table code { font-family: var(--mono); font-size: 10.5px; background: var(--panel2); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+
+/* ---- raw-json footer + stdout json tree ---------------------------------- */
+.jv-rawjson { max-height: 420px; }
+.jv-stream { padding: 9px 12px; border-top: 1px solid var(--line); }
+.jv-card .jraw { margin-top: 4px; }
+
+@media (max-width: 700px) {
+  .jv-compare, .jv-compare.cols-3, .jv-compare.cols-2 { grid-template-columns: 1fr; text-align: left; }
+  .jv-cl { text-align: left; }
+  .jv-rel { border-inline: 0; border-block: 1px solid var(--line); }
+}

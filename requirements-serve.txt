@@ -1,0 +1,3 @@
+--extra-index-url https://wheels.vllm.ai/nightly
+
+vllm

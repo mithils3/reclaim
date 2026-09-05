@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RECLAIM run traces</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#F0EEE6" />
+  <!-- set the theme before first paint so there is no flash -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('theme');
+        var theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="overview.css" />
+  <link rel="stylesheet" href="viewer.css" />
+  <link rel="stylesheet" href="jsonview.css" />
+  <link rel="stylesheet" href="live.css" />
+  <link rel="stylesheet" href="analysis.css" />
+  <link rel="stylesheet" href="anon.css" />
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+  <div id="app" class="app">
+    <header class="topbar">
+      <div class="brand" title="RECLAIM">
+        <svg class="b-mark" viewBox="0 0 22 16" fill="none" aria-hidden="true">
+          <line x1="1" y1="5" x2="21" y2="5" style="stroke:var(--predicted);opacity:.8" stroke-width="1" stroke-dasharray="2 2"/>
+          <polyline points="1,15 6,12 10,11 14,6 18,3" style="stroke:var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="3" r="2" style="fill:var(--yes)"/>
+        </svg>
+        <span class="b-name"><b>RECL</b><span>AIM</span></span>
+        <span class="b-sub">reproduction run traces</span>
+        <span class="b-count" id="brand-count"></span>
+      </div>
+      <nav class="tabs" aria-label="Sections">
+        <button class="tab active" data-view="overview">Overview</button>
+        <button class="tab" data-view="runs">Runs</button>
+        <button class="tab" data-view="papers">Papers</button>
+        <button class="tab" data-view="about">About</button>
+      </nav>
+      <div class="who">
+        <button id="theme-toggle" class="icon-btn" title="Switch theme" aria-label="Switch theme">☾</button>
+      </div>
+    </header>
+
+    <div id="filterbar" class="filterbar"></div>
+
+    <!-- OVERVIEW: headline tiles, the agent x tier matrix, failure modes, budget -->
+    <main id="view-overview" class="view">
+      <section class="detail"><div id="overview-root"></div></section>
+    </main>
+
+    <!-- RUNS: the filtered, sortable table of every published run -->
+    <main id="view-runs" class="view hidden">
+      <section class="detail"><div id="runs-root"></div></section>
+    </main>
+
+    <!-- RUN: header, audit, dissection and the transcript strip chart -->
+    <main id="view-run" class="view hidden">
+      <section class="detail"><div id="run-root"></div></section>
+    </main>
+
+    <!-- PAPERS: every target paper by claim, one cell per agent -->
+    <main id="view-papers" class="view hidden">
+      <section class="detail"><div id="papers-root"></div></section>
+    </main>
+
+    <!-- ABOUT: the methods note, in the paper's own terms -->
+    <main id="view-about" class="view hidden">
+      <section class="detail">
+        <div class="about-wrap">
+        <div class="ov-head"><div><h1>About</h1>
+          <div class="ov-sub">A read-only record of reproduction attempts on machine learning papers, published so a reviewer can read the runs behind the reported numbers.</div></div></div>
+
+        <!-- Two hand-packed columns. Left: what the benchmark is and what you are
+             looking at. Right: how a run is graded. Packed this way the two
+             columns end within ~50px of each other; auto-placed by row they did
+             not, because "how a run is graded" is three times the height of "the
+             three tiers" and stranded the whole bottom right of the page. -->
+        <div class="about-grid">
+        <div class="about-col">
+        <section class="panel-card an-sec about-card">
+          <div class="pc-head"><span class="plate">the benchmark</span></div>
+          <p class="rprose"><span data-b="name">RECLAIM</span> is <span data-b="papers">100</span> <span data-b="venue">NeurIPS 2025</span> papers. Each paper carries one target claim with a fixed tolerance, a metered compute budget in H100 hours, and a tier set by what the authors released. An agent attempts each paper once per tier sweep.</p>
+          <p class="rprose">The compute unit throughout is the H100 hour, written H100·h. One H100·h is one hour of one accelerator at the reference rate. Budgets, spend and the predicted ceiling on every chart use that same unit, so a curve that crosses the dashed indigo line has spent more than the paper was predicted to need.</p>
+        </section>
+
+        <section class="panel-card an-sec about-card">
+          <div class="pc-head"><span class="plate">the three tiers</span></div>
+          <ul class="about-list" id="about-tiers">
+            <li><b>Run.</b> code, data and weights released; execute or evaluate</li>
+            <li><b>Retrain.</b> code and data released, no released weights; train before evaluating</li>
+            <li><b>Reimplement.</b> no released code; rebuild the method from the paper</li>
+          </ul>
+        </section>
+
+        <section class="panel-card an-sec about-card">
+          <div class="pc-head"><span class="plate">transcripts</span></div>
+          <p class="rprose">Transcripts are shown verbatim. Reasoning, assistant turns, commands, standard output and standard error are the text the run actually produced. Sandbox paths and identifiers are replaced by bracketed tokens such as <code>[user]</code>, <code>[host]</code> or <code>[redacted]</code>, and each run is named by its agent, its tier and its paper.</p>
+          <p class="rprose">The curve above a transcript is cumulative spend across the rounds, raced against the predicted ceiling. The rail beside the rounds is the same curve turned on its side: click a marker to jump to that round. Round cards are collapsed apart from the last two and the final round, which carries the agent's own report.</p>
+        </section>
+        </div>
+
+        <div class="about-col">
+        <section class="panel-card an-sec about-card">
+          <div class="pc-head"><span class="plate">how a run is graded</span></div>
+          <p class="rprose">A pinned auditor, <span data-b="auditor">Claude Sonnet 5</span>, reads the run's evidence bundle and its transcript and assigns a score from 0 to 10 with a written rationale. The verdict is derived from that score in code.</p>
+          <ul class="about-list">
+            <li><b>8 to 10 · reproduced.</b> The claim was met at the stated bar.</li>
+            <li><b>6 to 7 · partial.</b> A real number came out of the pipeline and missed the claim's bar or its scope.</li>
+            <li><b>1 to 5 · not reproduced.</b> A score of 1 reads unverifiable when execution was not verified.</li>
+            <li><b>0 · disqualified.</b> A high severity integrity flag caps the score here.</li>
+          </ul>
+          <p class="rprose">The auditor also raises flags. A flag names the kind of integrity problem it found, a severity, and the evidence in the transcript that supports it. Rationales, flags and dissection notes are shown as recorded, except that references to internal rubric bands, criterion codes, file names and scheduling terms are replaced by plain words or removed.</p>
+        </section>
+
+        <section class="panel-card an-sec about-card">
+          <div class="pc-head"><span class="plate">failure modes</span></div>
+          <p class="rprose">A separate dissection of the transcript assigns each run one primary failure mode from a fixed vocabulary. It never changes a grade. The mode is what the overview's stacked bars count, and the run page prints its definition beside it.</p>
+          <p class="rprose">Three verdict families colour the whole site: <span class="vd reproduced"><span class="vg">●</span>reproduced</span>, <span class="vd miss"><span class="vg">◐</span>miss</span> for a partial result, and <span class="vd fault"><span class="vg">✕</span>fault</span> for a run that did not reach the claim.</p>
+        </section>
+        </div>
+        </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="render.js"></script>
+  <script src="jsonview.js"></script>
+  <script src="render_round.js"></script>
+  <script src="runcard.js"></script>
+  <script src="verdict.js"></script>
+  <script src="trace.js"></script>
+  <script src="charts.js"></script>
+  <script src="strip.js"></script>
+  <script src="data.js"></script>
+  <script src="overview.js"></script>
+  <script src="runs.js"></script>
+  <script src="run_detail.js"></script>
+  <script src="papers.js"></script>
+  <script src="app.js"></script>
+  <script>
+    /* theme toggle: flip data-theme, persist, keep the icon and browser UI colour in sync */
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('theme-toggle');
+      if (!btn) return;
+      var meta = document.querySelector('meta[name="theme-color"]');
+      function sync() {
+        var dark = root.getAttribute('data-theme') === 'dark';
+        btn.textContent = dark ? '☀' : '☾';
+        btn.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+        if (meta) meta.setAttribute('content', dark ? '#000000' : '#F0EEE6');
+      }
+      btn.addEventListener('click', function () {
+        var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+        sync();
+      });
+      sync();
+    })();
+  </script>
+</body>
+</html>

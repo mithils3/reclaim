@@ -1,0 +1,215 @@
+/* overview.css: the overview worksheet, the papers pages, the shared
+   instrument primitives (ledger / stamp / arc gauge / verdict legend)
+   and the shared tables. Reuses styles.css tokens. */
+
+.ov-head { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 8px; }
+.ov-head h1 { font-family: var(--display); font-size: 26px; font-weight: 600; }
+.ov-sub { font-size: 12.5px; color: var(--muted); margin-top: 5px; max-width: 720px; line-height: 1.5; }
+
+.plate { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.vg { font-family: var(--mono); line-height: 1; }
+
+/* ---- shared: ledger / stamp ---------------------------------------------- */
+.ledger { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.lg-track { position: relative; flex: 1; min-width: 70px; max-width: 520px; height: 9px; border-radius: 5px; background: var(--panel2); overflow: hidden; border: 1px solid var(--line); }
+.ledger.lg .lg-track { height: 12px; }
+.lg-pred { position: absolute; left: 0; top: 0; bottom: 0; background: var(--predicted-tint); }
+.lg-took { position: absolute; left: 0; top: 0; bottom: 0; background: var(--over); border-radius: 5px 0 0 5px; }
+.lg-over { position: absolute; top: 0; bottom: 0; background: var(--no); }
+.lg-tick { position: absolute; top: -2px; bottom: -2px; width: 0; border-left: 1.5px dashed var(--predicted); }
+.lg-pct { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.lg-pct.over { color: var(--no-deep); } .lg-pct.under { color: var(--yes-deep); }
+
+
+.stamp { display: inline-block; transform: rotate(-3deg); font-family: var(--mono); font-weight: 600; font-size: 12px;
+  letter-spacing: .08em; text-transform: uppercase; padding: 4px 12px; border: 2px solid; border-radius: 5px; white-space: nowrap; }
+.stamp.reproduced { color: var(--yes-deep); border-color: var(--yes); background: var(--yes-tint); }
+.stamp.miss { color: var(--over-deep); border-color: var(--over); background: var(--over-tint); }
+.stamp.fault { color: var(--no-deep); border-color: var(--no); background: var(--no-tint); }
+.stamp.idle, .stamp.done, .stamp.running { color: var(--muted); border-color: var(--slate); background: var(--slate-tint); }
+
+/* ---- thesis band --------------------------------------------------------- */
+.arc-gauge { width: 156px; height: auto; display: block; }
+.ag-track { stroke: var(--panel2); } .ag-prog { stroke: var(--yes); }
+.ag-num { font-family: var(--display); font-weight: 700; font-size: 26px; fill: var(--txt); }
+.ag-pct { font-family: var(--display); font-weight: 600; font-size: 13px; fill: var(--muted); }
+.gauge-cap { text-align: center; } .gauge-cap b { font-family: var(--display); font-size: 13px; }
+.gauge-cap span { display: block; font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+
+.lc-sub { font-size: 11px; color: var(--muted); }
+
+/* ---- overview hero: the tier legend dims what the filter excludes -------- */
+.ov-tierdef.off { opacity: .42; }
+/* the three tier blocks are one row of chips, so the chips sit on one line: the
+   column starts from the top and the description hangs below it. Centred, the
+   middle chip rode 8px high off its own two-line description. Scoped to the card
+   to outrank the base rule in the later sheet without an !important. */
+.ov-tierdefs .ov-tierdef { justify-content: flex-start; }
+
+/* ---- matrix + scatter ---------------------------------------------------- */
+/* two identically chromed peers, so they are the same width: the old 1.05fr left
+   column read as a mistake rather than as a hierarchy */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+.panel-card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 16px 18px; }
+.pc-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.matrix { width: 100%; border-collapse: collapse; font-size: 12px; }
+.matrix th, .matrix td { padding: 6px 8px; text-align: center; }
+.matrix th:first-child, .matrix td:first-child { text-align: left; }
+.mt-model { font-family: var(--mono); font-size: 11.5px; font-weight: 500; white-space: nowrap; vertical-align: middle; }
+.mt-frac { font-family: var(--mono); font-size: 12px; font-weight: 500; display: block; }
+/* the reproduced share is a chart element, not a hairline: it carries the same
+   weight as the number above it, and a nonzero share never rounds to nothing */
+.mt-bar { display: block; height: 8px; border-radius: var(--r-xs); background: var(--panel2); overflow: hidden; margin-top: 6px; }
+.mt-bar i { display: block; height: 100%; min-width: 4px; border-radius: 4px; background: var(--yes); }
+.mt-cell.empty { color: var(--line-strong); }
+
+/* the matrix table: a head row of tier chips, one row per agent, an all-agents
+   footer. Column rules come from the rows, so the numbers read as a column. */
+.ov-matrix .matrix { min-width: 470px; }
+.matrix thead th { font-weight: 500; vertical-align: bottom; }
+.matrix .mt-corner { width: 150px; }
+.matrix.mt-big tbody tr + tr > *, .matrix.mt-big tfoot > tr > * { border-top: 1px solid var(--line); }
+.matrix.mt-big tfoot > tr > * { border-top-color: var(--line-strong); }
+.matrix.mt-big tfoot .mt-model { color: var(--muted); }
+.matrix.mt-big tfoot .mt-mean { font-size: 18px; color: var(--muted); }
+.matrix.mt-big tfoot .mt-bar i { background: var(--slate); }
+
+/* ---- papers grid --------------------------------------------------------- */
+.ps-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.ps-count { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.ps-filters { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.ps-filters select, .s-search { font: inherit; font-family: var(--mono); font-size: 12px; padding: 5px 10px; border: 1px solid var(--line-strong); border-radius: 7px; background: var(--panel); color: var(--txt); }
+.s-search { min-width: 220px; }
+select:focus, .s-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+.lg-item { display: inline-flex; align-items: center; gap: 6px; } .lg-item .vg { font-size: 13px; }
+.lg-item.reproduced { color: var(--yes-deep); } .lg-item.miss { color: var(--over-deep); } .lg-item.fault { color: var(--no-deep); }
+
+/* ---- one paper (detail page) --------------------------------------------- */
+.spec-hero { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 18px; }
+.spec-main { flex: 1; min-width: 0; }
+.spec-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.spec-arx { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.spec-links { display: inline-flex; gap: 10px; font-family: var(--mono); font-size: 12px; }
+.spec-claim { font-family: var(--display); font-size: 27px; font-weight: 600; line-height: 1.2; letter-spacing: -.01em; margin: 0 0 12px; overflow-wrap: anywhere; }
+.spec-band { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 10px; } .spec-band b { color: var(--txt); } .spec-band .plate { margin-right: 8px; }
+
+/* ---- tables (Papers + Stats + runs) -------------------------------------- */
+#view-papers .detail > *, #view-stats .detail > .stats-wrap { max-width: 1240px; }
+.stats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.stats-table th, .stats-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; text-align: left; }
+.stats-table thead th { position: sticky; top: 0; background: var(--bg); cursor: pointer; user-select: none; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; white-space: nowrap; z-index: 1; }
+.stats-table thead th:hover { color: var(--txt); } .stats-table thead th.sorted { color: var(--accent-strong); }
+.stats-table th.num, .stats-table td.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); }
+.stats-table tbody tr { cursor: pointer; } .stats-table tbody tr:hover { background: var(--panel2); }
+.pl-claim-cell { max-width: 440px; } .pl-claim-cell .vg { margin-right: 8px; } .pcell-claim { color: var(--txt); overflow-wrap: anywhere; }
+.s-rid { font-family: var(--mono); font-size: 10px; color: var(--muted); display: block; margin-top: 2px; }
+.s-model { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+.runs-table .ledger { min-width: 140px; }
+
+/* ---- charts -------------------------------------------------------------- */
+.chart-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
+.chart-h { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.chart-t { font-family: var(--display); font-size: 15px; font-weight: 600; }
+.chart-s { font-size: 11px; color: var(--muted); }
+.chart-legend { display: flex; gap: 14px; margin: 6px 0 10px; font-size: 11px; color: var(--muted); }
+.chart-legend .lg { display: inline-flex; align-items: center; gap: 5px; }
+.sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.bars { display: grid; gap: 8px; margin-top: 6px; }
+.bar-row { display: grid; grid-template-columns: 130px 1fr auto; align-items: center; gap: 10px; }
+.bar-label { font-family: var(--mono); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { height: 14px; background: var(--panel2); border-radius: 5px; overflow: hidden; display: flex; }
+.seg { height: 100%; display: block; }
+.bar-val { font-family: var(--mono); font-size: 11px; color: var(--muted); min-width: 48px; text-align: right; }
+.chart-empty { font-size: 12px; color: var(--muted); padding: 14px 0; text-align: center; }
+/* a column chart whose numerals are unnamed is a puzzle, so the axis says what
+   the row of keys under the columns is */
+.hg-axis { font-family: var(--mono); font-size: var(--fs-micro); letter-spacing: .03em;
+  color: var(--faint); text-align: center; margin-top: 7px; }
+
+/* a ten-entry legend read as a paragraph of coloured dots wrapped over four
+   lines. Two columns with the counts in one mono numeral column make it a
+   table, which is also what lets the card's bars keep the room they need. */
+.chart-legend .lg-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chart-legend .lg-n { margin-left: auto; padding-left: var(--s2); font-family: var(--mono);
+  font-weight: 600; color: var(--txt); font-variant-numeric: tabular-nums; }
+.chart-legend.lg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 18px; row-gap: 4px; align-items: center; }
+.chart-legend.lg-grid .lg { min-width: 0; }
+.chart-legend .lg.lg-zero { opacity: .45; }
+
+/* a total row is a margin, ruled off and demoted like the matrix footer; a
+   per-tier row under a single agent is subordinate to the agent above it */
+.bars .bar-row.bar-total { padding-top: var(--s2); border-top: 1px solid var(--line-strong); }
+.bars .bar-row.bar-total .bar-label { color: var(--muted); }
+.bars .bar-row:not(.bar-sub) + .bar-row.bar-sub { padding-top: var(--s2); border-top: 1px solid var(--line); }
+.bars .bar-row.bar-sub .bar-label { padding-left: var(--s3); color: var(--muted); }
+
+/* the two overview charts share a grid row: the shorter card fills the row with
+   chart rather than with empty card, so neither one is padded out with nothing */
+.ov-grid > .chart-card { display: flex; flex-direction: column; }
+/* except when the selection leaves it a single bar: a short card at its own
+   height beats a tall card built around a void */
+.ov-grid > .chart-card.ov-modes-thin { align-self: start; }
+.ov-grid .hgram { flex: 1 1 auto; height: auto; min-height: 156px; }
+.ov-grid .bars { flex: 1 1 auto; align-content: center; }
+
+/* the budget panel is the page's one full-width card, so it is read across
+   rather than down: the three tiers stand in three columns ruled apart like the
+   hero legend, and each column's two tracks span it. Stacked down the middle the
+   same six bars left 400px of the panel empty, three times over. */
+.ov-compute .chart-card .bars { grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0; margin-top: var(--s3); }
+.ov-compute .cmp-group { margin: 0; min-width: 0; padding: 0 var(--s4);
+  border-left: 1px solid var(--line); }
+.ov-compute .cmp-group:first-child { padding-left: 0; border-left: 0; }
+.ov-compute .cmp-group:last-child { padding-right: 0; }
+.ov-compute .cmp-group.off { opacity: .42; }
+.ov-compute .cmp-tier { margin-bottom: var(--s3); }
+/* label and value head the track instead of flanking it: at a third of the
+   panel the bar keeps its full measure, so a 21% and a 33% fill read apart */
+.ov-compute .bar-row { grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "l v" "t t"; column-gap: var(--s2); row-gap: 5px; }
+.ov-compute .bar-label { grid-area: l; }
+.ov-compute .bar-val { grid-area: v; min-width: 0; color: var(--txt); }
+.ov-compute .bar-track { grid-area: t; }
+.ov-compute .bar-row + .bar-row { margin-top: var(--s3); }
+.ov-compute .chart-empty { text-align: left; padding: var(--s2) 0; }
+
+@media (max-width: 900px) {
+  .thesis { grid-template-columns: 1fr; } .grid2 { grid-template-columns: 1fr; }
+  .spec-hero { flex-direction: column; }
+  /* under three readable columns the tiers go back to stacking, ruled off from
+     one another the way the columns were ruled apart */
+  .ov-compute .chart-card .bars { grid-template-columns: 1fr; }
+  .ov-compute .cmp-group { padding: 0; border-left: 0; }
+  .ov-compute .cmp-group + .cmp-group { margin-top: var(--s3); padding-top: var(--s3);
+    border-top: 1px solid var(--line); }
+}
+
+/* one legend column once two would clip the mode names */
+@media (max-width: 620px) {
+  .chart-legend.lg-grid { grid-template-columns: 1fr; }
+}
+
+/* the matrix stops being a table below the width three number columns need, and
+   becomes one block per agent with its three tiers listed down the card. That is
+   what removes the cut-off column and the sideways scroll on a phone. */
+@media (max-width: 620px) {
+  .ov-matrix .matrix, .ov-matrix .tscroll > table { min-width: 0; }
+  .matrix.mt-big thead { display: none; }
+  .matrix.mt-big, .matrix.mt-big tbody, .matrix.mt-big tfoot, .matrix.mt-big tr { display: block; width: 100%; }
+  .matrix.mt-big tr { border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; }
+  .matrix.mt-big tr + tr { margin-top: var(--s2); }
+  .matrix.mt-big tbody tr + tr > *, .matrix.mt-big tfoot > tr > * { border-top: 0; }
+  .matrix.mt-big th.mt-model { display: flex; align-items: baseline; justify-content: space-between;
+    background: var(--panel2); padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  .matrix.mt-big td.mt-cell { display: grid; grid-template-columns: 92px auto 1fr;
+    align-items: center; column-gap: var(--s2); row-gap: 5px; text-align: left;
+    padding: 9px 12px; border-radius: 0; }
+  .matrix.mt-big td.mt-cell + .mt-cell { border-top: 1px solid var(--line); }
+  .matrix.mt-big td.mt-cell::before { content: attr(data-label); font-family: var(--mono);
+    font-size: 11px; color: var(--muted); }
+  .matrix.mt-big td.mt-cell .mt-mean { font-size: 18px; }
+  .matrix.mt-big td.mt-cell .mt-frac { margin-top: 0; justify-self: start; }
+  .matrix.mt-big td.mt-cell .mt-bar { grid-column: 1 / -1; max-width: none; margin: 0; }
+}

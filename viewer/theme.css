@@ -1,0 +1,53 @@
+/* Dark mode: "true black". A pure black ground with neutral (no blue, no brown)
+   greys stepping up to the raised cards, so the clay burn-trace, indigo predicted
+   ceiling and the verdict palette glow like ink on unlit glass. styles.css,
+   overview.css, viewer.css and anon.css drive everything off these custom
+   properties; here we just re-point them. Every token defined on :root in
+   styles.css that carries a colour is re-pointed below, so nothing falls back to
+   a light value on a black ground. */
+
+:root[data-theme="dark"] {
+  --bg: #000000;
+  --bg-side: #0A0A0A;
+  --panel: #121212;
+  --panel2: #1C1C1C;
+  --line: #262626;
+  --line-strong: #383838;
+  --txt: #EDEBE6;
+  --muted: #8E8B84;
+  --faint: #6F6C66;
+  --accent: #D97757;
+  --accent-strong: #E68E6F;
+  --accent-tint: rgba(217, 119, 87, .15);
+  --yes: #5FA36B;  --yes-tint: rgba(95, 163, 107, .16);  --yes-deep: #8FC79A;
+  --over: #E0A63A; --over-tint: rgba(224, 166, 58, .16); --over-deep: #F0C97E;
+  --no: #E06A82;   --no-tint: rgba(224, 106, 130, .16);  --no-deep: #F094A6;
+  --predicted: #9A8FF0; --predicted-tint: rgba(154, 143, 240, .16);
+  --slate: #605C55; --slate-tint: rgba(142, 139, 132, .16);
+
+  /* failure modes: the same ten hues lifted for a black ground */
+  --mode-reproduced: #6FB47C;
+  --mode-nearmiss:   #E0A63A;
+  --mode-reimpl:     #E8697F;
+  --mode-envfight:   #3FBFAF;
+  --mode-provenance: #A98BF0;
+  --mode-scope:      #E8875F;
+  --mode-stale:      #6FA3F0;
+  --mode-procrast:   #E374C0;
+  --mode-killed:     #93A2B5;
+  --mode-other:      #A8A296;
+
+  --grid-line: rgba(255, 255, 255, .04);
+  --edge-shadow: rgba(0, 0, 0, .55);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .5);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 4px 16px rgba(0, 0, 0, .7);
+  --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238E8B84' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  color-scheme: dark;
+}
+
+/* a raised card on true black needs a lit top edge, not a drop shadow, to read
+   as raised at all */
+:root[data-theme="dark"] .panel-card,
+:root[data-theme="dark"] .chart-card { background-image: linear-gradient(var(--panel2) 0 1px, transparent 1px); }
+
+:root[data-theme="dark"] .topbar { background: color-mix(in srgb, var(--bg) 82%, transparent); }

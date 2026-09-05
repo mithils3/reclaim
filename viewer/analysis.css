@@ -1,0 +1,77 @@
+/* analysis.css: the audit and dissection cards on a run page. Reuses the
+   styles.css / overview.css tokens and primitives (panel-card, plate, badge,
+   block-l, rprose); only the pieces those two cards need live here: the section
+   shell, the score chip, the paper gist, the auditor's flags and the evidence
+   quotes that jump into the transcript. */
+
+/* ---- score chip (runs table, papers page, audit head) --------------------- */
+.an-score { font-family: var(--display); font-weight: 700; font-size: 14px; margin-left: auto; padding: 1px 8px; border-radius: 6px; border: 1px solid; white-space: nowrap; }
+.an-score span { font-family: var(--mono); font-size: 9.5px; font-weight: 500; opacity: .8; }
+.an-score.yes { color: var(--yes-deep); border-color: var(--yes); background: var(--yes-tint); }
+.an-score.over { color: var(--over-deep); border-color: var(--over); background: var(--over-tint); }
+.an-score.no { color: var(--no-deep); border-color: var(--no); background: var(--no-tint); }
+.an-score.slate { color: var(--muted); border-color: var(--slate); background: var(--slate-tint); }
+
+/* ---- section shell -------------------------------------------------------- */
+.an-sec .pc-head { justify-content: flex-start; gap: 10px; }
+.an-sec-note { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+.an-sec p { margin: 0 0 9px; font-size: 13.5px; line-height: 1.62; color: var(--txt); }
+.an-sec p:last-child { margin-bottom: 0; }
+/* The card is capped, not only the text inside it. Capping the prose alone left
+   the audit, the dissection and every flag box drawn at the full 1280px page
+   measure around content that stopped 400px short, which on a red high-severity
+   flag read as a half-painted box. The card stops at the reading width, its
+   flags and quotes fill it, and only the running paragraph keeps a measure. */
+.rd-audit, .rd-dissect { max-width: var(--read-max); }
+.an-sec .rprose { max-width: var(--measure); }
+
+/* the paper's gist, on a paper page */
+.an-d-gist { font-size: 13.5px; color: var(--muted); line-height: 1.55; margin: 8px 0 0; max-width: var(--measure); }
+
+/* ---- one paper: header cluster and page measure --------------------------
+   The page was two staggered columns: the stat tiles took the page measure and
+   the runs table stopped 280px short of them, while the verdict stamp floated
+   alone at the far right, 800px from the tier / arxiv / paper / code chips it
+   belongs with. The stamp now leads that chip row and the table matches the
+   tiles, so the header reads as one cluster over one column. */
+.spec-tags .stamp { margin-right: var(--s1); }
+.tscroll.tshort, .tscroll.tshort:has(> table.stats-table) { max-width: var(--content-max); }
+/* no point estimate on record: the band in muted type, never a lone middot */
+.c-pred .c-band { color: var(--muted); }
+.itile.quiet .it-v, td.c-pred.quiet { color: var(--muted); font-weight: 500; }
+.itile.quiet .it-v { font-family: var(--sans); font-size: 15px; }
+
+/* ---- auditor flags --------------------------------------------------------
+   ONE renderer feeds these (JsonView.flagsHtml), used by the run page's audit
+   card and by the auditor's own verdict JSON in the transcript. A flag is a
+   kind, a severity badge and its evidence on its own line; anything the
+   vocabulary does not name falls to a labelled key/value row, never a dump. */
+.an-flags-l { display: flex; align-items: baseline; gap: var(--s2); }
+.an-flag { border: 1px solid var(--line); border-left-width: 3px; border-radius: var(--r-sm);
+  padding: 10px 13px; margin-bottom: 8px; background: var(--panel2); }
+.an-flag:last-child { margin-bottom: 0; }
+.an-flag.slate { border-left-color: var(--slate); }
+.an-flag.no { border-color: var(--no); background: var(--no-tint); }
+.an-flag.over { border-color: var(--over); background: var(--over-tint); }
+.an-flag-h { display: flex; align-items: center; gap: var(--s2); margin-bottom: 5px; }
+.an-flag-kind { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--txt);
+  text-transform: uppercase; letter-spacing: .03em; overflow-wrap: anywhere; }
+.an-flag-ev { font-size: 12.5px; line-height: 1.55; color: var(--txt); overflow-wrap: anywhere; }
+.an-flag-kv { display: flex; gap: var(--s2); margin-top: 5px; font-family: var(--mono); font-size: 11px; }
+.an-flag-k { flex: none; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.an-flag-v { color: var(--txt); overflow-wrap: anywhere; }
+.an-noflags { margin: 0; font-family: var(--mono); font-size: 11.5px; color: var(--yes-deep); font-weight: 500; }
+
+/* ---- evidence quotes ------------------------------------------------------ */
+.an-quotes { display: grid; gap: 10px; }
+.an-q > * { min-width: 0; }
+/* the label column fits "ROUND 999 ↓" whole: at 78px a three-digit round wrapped
+   the arrow onto its own line, and long transcripts run past round 200 */
+.an-q { margin: 0; display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: start; padding: 9px 12px;
+  border-left: 3px solid var(--accent); background: var(--panel2); border-radius: 0 8px 8px 0; }
+.an-q-round { font-family: var(--mono); font-size: 10.5px; color: var(--accent-strong); text-transform: uppercase; letter-spacing: .04em; padding-top: 2px; white-space: nowrap; }
+.an-q-txt { font-family: var(--mono); font-size: 12px; line-height: 1.55; color: var(--txt); overflow-wrap: anywhere; }
+
+@media (max-width: 900px) {
+  .an-q { grid-template-columns: 1fr; gap: 4px; }
+}

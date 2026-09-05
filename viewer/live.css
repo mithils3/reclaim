@@ -1,0 +1,242 @@
+/* live.css: the run-detail instrument tile strip, the horizontal burn-trace
+   panel, the micro fuel bar reused by the tables, the timeline round-card
+   controls, and the list-page rules the runs and papers tables own (page width,
+   sort caret, exit mark, the short pane on one paper's page). All colour goes
+   through the styles.css and theme.css custom-property tokens, so dark mode
+   works for free. */
+
+/* ---- micro fuel bar (spent against budget) -------------------------------- */
+/* The track is a fixed rail, never a flex filler. A bar that grows into whatever
+   the label beside it leaves over is a different length on every row, so a row
+   reading "24s / 8h 00m" got a wider track than one reading "22m 47s / 8h 00m"
+   and the fills stopped being comparable down the column, which is the only
+   thing the bar is for. Track and both durations are fixed cells, so every row's
+   bar starts and ends at the same x and the two numbers align on the slash. The
+   track holds the 84px that used to be its floor, so pinning it costs the runs
+   table no width. */
+.mfuel { display: flex; align-items: center; gap: var(--s2); }
+.mfuel-bar { position: relative; flex: none; width: 84px; height: 6px; border-radius: 3px; background: var(--panel2); overflow: hidden; border: 1px solid var(--line); }
+.mfuel-fill { display: block; height: 100%; background: var(--accent); border-radius: 3px 0 0 3px; }
+/* nearly every run spends single-digit percent of its budget, so a truthful
+   linear width rounds to nothing on an 84px track and every low row draws the
+   same sliver. runcard.js draws the fill and the predicted tick on a square-root
+   scale, which spreads that low end apart; the floor here only guarantees that a
+   spend which happened is visible at all. A spend of zero stays an empty track. */
+.mfuel-fill.done { background: var(--yes); min-width: 2px; }
+.mfuel-fill.over { background: var(--over); min-width: 2px; }
+.mfuel-fill.zero { min-width: 0; background: none; }
+.mfuel-pred { position: absolute; top: -1px; bottom: -1px; width: 0; border-left: 1.5px dashed var(--predicted); }
+.mfuel-v { flex: none; display: flex; align-items: baseline; font-family: var(--mono); font-size: 10px;
+  color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mfuel-v i { font-style: normal; color: var(--faint); margin: 0 2px; }
+/* seven monospace characters is the widest either side ever runs (11h 45m, 27m 25s) */
+.mfuel-a { flex: none; width: 44px; text-align: right; }
+.mfuel-b { flex: none; width: 44px; text-align: left; }
+
+/* ---- run-detail instrument tile strip ------------------------------------- */
+.itiles { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; }
+.itile { flex: 1 1 96px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; box-shadow: var(--shadow); }
+.it-l { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+.it-v { font-family: var(--display); font-size: 18px; font-weight: 600; line-height: 1.15; margin-top: 3px; color: var(--txt); display: flex; align-items: center; gap: 6px; }
+.itile.big .it-v { font-size: 23px; font-weight: 700; }
+.itile.live .it-v { color: var(--accent-strong); }
+.it-sub { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+
+/* ---- horizontal burn-trace panel (sibling of .run-top) -------------------- */
+.run-trace { margin: 14px 0 2px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 8px 12px; }
+.run-trace .trace-h { width: 100%; height: auto; display: block; }
+
+/* ---- timeline round-card controls ----------------------------------------- */
+.rounds-ctl { display: flex; gap: 14px; justify-content: flex-end; margin-bottom: -4px; }
+.rounds-ctl .link { font-family: var(--mono); font-size: 11px; }
+
+/* ---- the list pages: runs and papers --------------------------------------- */
+/* Ten data columns do not fit the prose measure. Claim, spend rail and failure
+   mode are the only elastic columns, and at the 1280px measure the pill lost:
+   six of the nine mode names are the site's own taxonomy vocabulary and they
+   ellipsised on most rows while 160px of margin sat empty on each side of the
+   table. The two list views take 40px of that back on each side, which is what
+   prints every mode name whole. Every other page, one paper included, keeps the
+   reading measure. */
+#view-runs section.detail > .wide-list,
+#view-papers section.detail > .wide-list { max-width: 1360px; }
+
+/* One scroller, not two. The shell overflowed its own viewport by ~40px, so a
+   wheel gesture with the cursor anywhere outside the table scrolled the page
+   instead of the rows and left the H1 sliced under the filter bar for the rest
+   of the session. The list shell is a flex column that ends at the viewport and
+   the pane takes whatever the two heading rows leave, so the table is the only
+   thing that scrolls. Below the pane breakpoint, where anon.css unbounds the
+   pane, and on a short window, the page goes back to scrolling as one document. */
+@media (min-width: 761px) and (min-height: 560px) {
+  .detail:has(> .wide-list) {
+    display: flex; flex-direction: column; overflow: hidden; padding-bottom: var(--s5); }
+  .detail > .wide-list { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  /* shrink to the room left, never grow past the rows: a search that matches two
+     runs gets a two-row card, not a 640px frame around 80px of table */
+  .wide-list > .tscroll:has(> table.stats-table) { flex: 0 1 auto; min-height: 0; max-height: none; }
+}
+
+/* the failure-mode column is sized to the longest name in a closed vocabulary
+   ("Reimplemented without validating"), not to a share of the slack, so the pill
+   reads whole on every row of both tables. The ellipsis on .mchip-t stays as the
+   fallback for a window narrower than the table. */
+.stats-table td.mode-cell { min-width: 274px; max-width: 300px; }
+.stats-table thead th[data-k="mode"], .stats-table thead th.mode-head { min-width: 274px; }
+/* under the width where the whole vocabulary fits, the floor would push the
+   token column off the pane instead. The pill goes back to ellipsising, which is
+   what the cell's title attribute is there for. */
+@media (max-width: 1364px) {
+  .stats-table td.mode-cell { min-width: 0; max-width: 186px; }
+  .stats-table thead th[data-k="mode"], .stats-table thead th.mode-head { min-width: 0; }
+}
+
+/* one paper carries three runs, so its table opts out of the tall pane rather
+   than reserving 340px and framing 190px of nothing under the last row */
+.tscroll.tshort, .tscroll.tshort:has(> table.stats-table) { min-height: 0; max-height: none; max-width: 1000px; }
+.tscroll.tshort > table { min-width: 680px; }
+/* seven short cells stretched across the page spread into a scatter, so the pane
+   is capped instead (above) and the fuel cell shrink-wraps its fixed track
+   rather than stretching a 0.2% fill across half the row */
+.paper-runs .fuel-cell { width: 1%; }
+.paper-runs .c-agent .vg, .runs-table .c-agent .vg { margin-right: 7px; }
+/* the predicted need is four characters wide; leaving it a share of the slack
+   opens a gutter between the tier chip and the number, so the claim takes it */
+.papers-table .c-pred { width: 1%; white-space: nowrap; }
+/* the column's unit, carried once in the head so the cells stay bare numbers */
+.stats-table thead th .th-u { color: var(--faint); font-weight: 500; }
+/* the three agent columns are chips, not numerals: the .num head rule right-
+   aligned the agent names while the cells under them stayed left, so each name
+   printed a chip-and-a-half to the right of the column it labelled. Head and
+   cell are centred together here, above the .stats-table th.num alignment.
+   PREDICTED and MEAN are real numerals and stay right-aligned. */
+.stats-table.papers-table th.pm-head, .stats-table.papers-table td.pm-cell { text-align: center; }
+
+/* the sort caret keeps its slot on the head that carries it; an unsorted head
+   emits an empty span, and holding 14px open for it pushed every right-aligned
+   numeric label 13px off the column of numbers underneath it */
+.stats-table thead th .th-dir { display: inline-block; width: 9px; margin-left: 5px;
+  font-size: 8px; line-height: 1; color: var(--accent-strong); }
+.stats-table thead th.num .th-dir { margin-left: 4px; }
+.stats-table thead th .th-dir:empty { display: none; }
+/* the cell rule in the table wins over .empty's own centring, so the no-results
+   line is restated here: centred in the pane, with the way out under it */
+.stats-table td.empty { text-align: center; padding: var(--s6) var(--s4); }
+.stats-table td.empty span { display: block; margin-top: 6px; font-size: 11.5px; color: var(--faint); }
+
+/* a run that was stopped from outside marks its round count; the label rides on
+   the title attribute */
+.rt-exit { color: var(--over-deep); font-size: 9px; margin-right: 5px; vertical-align: 1px; cursor: help; }
+
+/* between the card breakpoint and a wide desktop the ten columns run over the
+   pane, which cuts the token column off a laptop. The row padding and the fuel
+   track give that back instead of starting a sideways scroll for the sake of one
+   column. The breakpoint is where the 1360px list zone starts being squeezed by
+   the page gutter (1360 + 2 x 34). */
+@media (max-width: 1430px) {
+  .stats-table.runs-table th, .stats-table.runs-table td { padding-left: 7px; padding-right: 7px; }
+  .stats-table.runs-table .pl-claim-cell { min-width: 218px; }
+  /* the track shortens, but it stays one length for every row */
+  .runs-table .fuel-cell .mfuel-bar { width: 64px; }
+  .runs-table .fuel-cell .mfuel { gap: 5px; }
+}
+
+/* ---- the tables on a narrow screen ----------------------------------------- */
+/* below the width ten number columns need, the table stops being a table: one
+   run is one block, claim first, then the identity line, the outcome line and
+   the telemetry line. That is what removes the sideways scroll that otherwise
+   hides everything past the paper id. */
+@media (max-width: 900px) {
+  .tscroll > table.stats-table.runs-table { min-width: 0; font-size: 12.5px; }
+  /* the desktop floor under the mode column is what a card cannot carry: the pill
+     goes back to taking the width its row has and ellipsising past it */
+  .stats-table td.mode-cell { min-width: 0; max-width: 100%; }
+  .runs-table thead { display: none; }
+  .runs-table, .runs-table tbody, .runs-table tr { display: block; width: 100%; }
+  /* max-content on the three label columns, because an auto track falls back to
+     min-content once the row is tight and the agent name, which cannot wrap,
+     then runs under the tier chip. The elastic column is the third. */
+  .runs-table tbody tr { display: grid;
+    grid-template-columns: max-content max-content minmax(0, 1fr) max-content;
+    align-items: center; column-gap: var(--s2); row-gap: 6px;
+    padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .runs-table tbody td { display: block; border: 0; padding: 0; max-width: none; min-width: 0; }
+  /* the desktop cap on the claim cell is what keeps the row grid even; in a card
+     the claim owns the full width, so the cap has to be lifted explicitly */
+  .runs-table tbody td.c-claim { grid-column: 1 / -1; grid-row: 1; max-width: none; min-width: 0; }
+  .runs-table .c-claim .pcell-claim { -webkit-line-clamp: 3; max-width: calc(100% - 22px); }
+  .runs-table .c-paper   { grid-column: 1; grid-row: 2; }
+  .runs-table .c-agent   { grid-column: 2; grid-row: 2; }
+  .runs-table .c-tier    { grid-column: 3; grid-row: 2; }
+  /* the longest tier word is 2px wider than its column on a 390px screen */
+  .runs-table .c-tier .badge, .papers-table .c-tier .badge { padding: 2px 7px; }
+  .runs-table .c-score   { grid-column: 4; grid-row: 2; justify-self: end; }
+  .runs-table .c-verdict { grid-column: 1 / 3; grid-row: 3; }
+  .runs-table .c-mode    { grid-column: 3 / -1; grid-row: 3; justify-self: end; max-width: 100%; min-width: 0; }
+  .runs-table .c-fuel    { grid-column: 1 / 3; grid-row: 4; }
+  .runs-table .c-rounds  { grid-column: 3; grid-row: 4; justify-self: end; }
+  .runs-table .c-tokens  { grid-column: 4; grid-row: 4; justify-self: end; }
+  /* the head row is gone, so the two bare numerals say what they are */
+  .runs-table .c-rounds, .runs-table .c-tokens { white-space: nowrap; }
+  .runs-table .c-rounds::after, .runs-table .c-tokens::after {
+    content: " " attr(data-l); font-size: 9.5px; color: var(--faint); letter-spacing: .04em; }
+  .runs-table .c-fuel .mfuel { min-width: 0; }
+  .runs-table .c-fuel .mfuel-bar { width: 60px; }
+  /* one paper's runs carry no claim, so the block starts on the agent line */
+  .paper-runs .c-agent { grid-column: 1 / 4; grid-row: 1; }
+  .paper-runs .c-score { grid-row: 1; }
+  .paper-runs .c-verdict { grid-row: 2; } .paper-runs .c-mode { grid-row: 2; }
+  .paper-runs .c-fuel, .paper-runs .c-rounds, .paper-runs .c-tokens { grid-row: 3; }
+  .paper-runs .fuel-cell { width: auto; }
+  .runs-table tbody tr .empty { grid-column: 1 / -1; }
+
+  /* the papers grid stacks the same way: the row of agent scores is the reason
+     the page exists, so it must not sit off the right edge of a phone */
+  .tscroll > table.stats-table.papers-table { min-width: 0; font-size: 12.5px; }
+  .papers-table thead { display: none; }
+  .papers-table, .papers-table tbody, .papers-table tr { display: block; width: 100%; }
+  .papers-table tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    align-items: center; column-gap: var(--s2); row-gap: 7px;
+    padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .papers-table tbody td { display: block; border: 0; padding: 0; max-width: none; text-align: left; }
+  /* in a card the agent score sits under its own name label, so it aligns to the
+     card's left edge rather than to a column head that is no longer drawn */
+  .stats-table.papers-table td.pm-cell { text-align: left; }
+  .papers-table .c-claim { grid-column: 1 / -1; grid-row: 1; }
+  .papers-table .c-claim .pcell-claim { -webkit-line-clamp: 3; }
+  .papers-table .c-paper { grid-column: 1; grid-row: 2; }
+  .papers-table .c-tier  { grid-column: 2; grid-row: 2; }
+  /* the desktop rule shrink-wraps this column; in a card it is a grid item and
+     a percentage width would collapse it to nothing */
+  .papers-table .c-pred  { grid-column: 3 / -1; grid-row: 2; width: auto;
+    text-align: right; white-space: nowrap; }
+  /* the three agent cells take a column each. They are placed by hand: a row with
+     a missing run leaves a hole that auto-placement fills by inventing columns
+     off the right edge of the card. */
+  .papers-table .c-m     { grid-row: 3; }
+  .papers-table .c-m:nth-child(5) { grid-column: 1; }
+  .papers-table .c-m:nth-child(6) { grid-column: 2; }
+  .papers-table .c-m:nth-child(7) { grid-column: 3; }
+  .papers-table .c-mean  { grid-column: 4; grid-row: 3; text-align: right; }
+  /* each score names its agent, and the mean names itself */
+  .papers-table .c-m::before, .papers-table .c-pred::after, .papers-table .c-mean::after {
+    display: block; font-family: var(--mono); font-size: 9.5px; color: var(--faint);
+    letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .papers-table .c-m::before { content: attr(data-l); margin-bottom: 3px; }
+  .papers-table .c-pred::after, .papers-table .c-mean::after { content: attr(data-l); margin-top: 2px; }
+  .papers-table .pm-chip { min-width: 30px; }
+  .papers-table tbody tr .empty { grid-column: 1 / -1; }
+}
+
+/* on a phone the bar and its two durations no longer share a line with the round
+   and token counts: the counts take the line above and the bar runs the width of
+   the card, which is also the only place it reads as a bar */
+@media (max-width: 620px) {
+  .runs-table .c-rounds { grid-column: 1; grid-row: 4; justify-self: start; }
+  .runs-table .c-tokens { grid-column: 2 / 4; grid-row: 4; justify-self: start; }
+  .runs-table .c-fuel { grid-column: 1 / -1; grid-row: 5; }
+  .runs-table .c-fuel .mfuel-bar { width: 96px; }
+  .paper-runs .c-rounds, .paper-runs .c-tokens { grid-row: 3; }
+  .paper-runs .c-fuel { grid-row: 4; }
+}
