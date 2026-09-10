@@ -199,3 +199,18 @@ class PrepareEpisodesTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RenderKeepsRowBraceTokens(unittest.TestCase):
+    """A brace token inside a row's own text is content, not a placeholder."""
+
+    def test_row_text_with_brace_token_renders(self):
+        template = PROMPT_FILE.read_text(encoding="utf-8")
+        row = dict(ROW, claim_evidence="regret bound of O(tilde{O})(sqrt(KH*Gamma(KH)))")
+        prompt = render_reproduce_prompt(template, row, budget=8.0)
+        self.assertIn("O(tilde{O})", prompt)
+
+    def test_unknown_template_placeholder_still_errors(self):
+        with self.assertRaises(ValueError) as ctx:
+            render_reproduce_prompt("task {ARXIV_ID} {NOT_A_FIELD}", ROW, budget=8.0)
+        self.assertIn("{NOT_A_FIELD}", str(ctx.exception))

@@ -20,12 +20,15 @@ _PLACEHOLDER_RE = re.compile(r"\{[A-Z][A-Z0-9_]*\}")
 
 
 def render_reproduce_prompt(template: str, row: dict, *, budget: float) -> str:
-    rendered = template
-    for token, value in _replacements(row, budget).items():
-        rendered = rendered.replace(token, value)
-    leftover = sorted(set(_PLACEHOLDER_RE.findall(rendered)))
+    replacements = _replacements(row, budget)
+    # Check the template, never the rendered text: a row's own prose can carry a
+    # brace token that is not a placeholder, and it must reach the agent verbatim.
+    leftover = sorted(set(_PLACEHOLDER_RE.findall(template)) - set(replacements))
     if leftover:
         raise ValueError(f"reproduce prompt has unfilled placeholders: {', '.join(leftover)}")
+    rendered = template
+    for token, value in replacements.items():
+        rendered = rendered.replace(token, value)
     return rendered
 
 
