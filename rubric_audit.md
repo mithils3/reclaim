@@ -42,10 +42,6 @@ below. Do **not** re-derive the metric, value, or scope, and do not substitute a
 different config — grade the agent's run against the pinned tuple as given. (Only a
 legacy row with no pinned `match_target` falls back to deriving the bar yourself.)
 
-> TODO (final audits): these pinned tuples are the per-paper rulers for the headline
-> reproduction rate. In the final audit pass they should be human-reviewed/frozen so
-> the same claim is graded against the same bar across runs and years.
-
 Restate the central claim as a checkable target. Prefer a **scalar target** when
 the claim has one: metric, reference value(s), dataset/split, model/config, and
 what counts as a match (op + tolerance). The match bar is usually left **implicit**
