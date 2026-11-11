@@ -196,6 +196,39 @@ class EditFileTests(unittest.TestCase):
             self.assertEqual((ctx.workspace / "a.txt").read_text(), "a\nB\nc\n")
 
 
+class HarnessSinkTests(unittest.TestCase):
+    def test_write_and_edit_refuse_each_sink_and_keep_content(self):
+        with tempfile.TemporaryDirectory() as d:
+            ctx = _ctx(Path(d))
+            for name in evidence.HARNESS_OWNED_SINKS:
+                sink = ctx.evidence / name
+                sink.write_text("harness row\n", encoding="utf-8")
+                for path in (str(sink), f"/repro/evidence/{name}"):
+                    w = write_file({"path": path, "content": "agent\n"}, ctx)
+                    e = edit_file({"path": path, "old_string": "harness", "new_string": "agent"}, ctx)
+                    self.assertFalse(w["ok"])
+                    self.assertEqual(w["error"], f"{name} is written by the harness and is read-only")
+                    self.assertFalse(e["ok"])
+                    self.assertEqual(sink.read_text(encoding="utf-8"), "harness row\n")
+
+    def test_symlink_to_sink_is_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            ctx = _ctx(Path(d))
+            link = ctx.workspace / "link.log"
+            link.symlink_to(ctx.evidence / "commands.log")
+            res = write_file({"path": "link.log", "content": "x"}, ctx)
+            self.assertFalse(res["ok"])
+            self.assertIn("read-only", res["error"])
+            self.assertEqual((ctx.evidence / "commands.log").read_text(encoding="utf-8"), "")
+
+    def test_other_evidence_files_stay_writable(self):
+        with tempfile.TemporaryDirectory() as d:
+            ctx = _ctx(Path(d))
+            res = write_file({"path": "/repro/evidence/notes.md", "content": "hi\n"}, ctx)
+            self.assertTrue(res["ok"])
+            self.assertEqual((ctx.evidence / "notes.md").read_text(encoding="utf-8"), "hi\n")
+
+
 class UpdatePlanTests(unittest.TestCase):
     PLAN = [
         {"step": "Install torch + verify GPU", "status": "completed"},

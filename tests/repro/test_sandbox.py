@@ -195,6 +195,22 @@ class FromRunPathsTests(unittest.TestCase):
             self.assertIn("/tmp", by_dst)
             self.assertEqual(by_dst[str(cache.resolve())].src, str(cache.resolve()))
 
+    def test_harness_sinks_bind_read_only_after_evidence_dir(self):
+        with tempfile.TemporaryDirectory() as d:
+            paths = resolve_run_paths(Path(d) / "runs", "2505.11483", 8.0, run_id="RID")
+            create_layout(paths)
+            sb = from_run_paths(paths, image=IMAGE, caches=[])
+            ev = str(paths.evidence.resolve())
+            dsts = [b.dst for b in sb.binds]
+            for name in ("commands.log", "trajectory.jsonl"):
+                pos = dsts.index(f"{CONTAINER_EVIDENCE}/{name}")
+                self.assertGreater(pos, dsts.index(CONTAINER_EVIDENCE))
+                self.assertTrue(sb.binds[pos].ro)
+                self.assertEqual(sb.binds[pos].src, f"{ev}/{name}")
+                self.assertTrue(Path(ev, name).is_file())
+                argv = " ".join(sb.wrap_argv("true"))
+                self.assertIn(f"--bind {ev}/{name}:{CONTAINER_EVIDENCE}/{name}:ro", argv)
+
 
 @unittest.skipUnless(
     TEST_SIF and shutil.which("apptainer") and apptainer_usable(TEST_SIF),

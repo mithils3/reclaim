@@ -58,6 +58,8 @@ def write_file(arguments: dict[str, Any], ctx: ExecutionContext) -> dict[str, An
     if not resolved["ok"]:
         return resolved
     target: Path = resolved["path"]
+    if (refusal := _sink_refusal(ctx, target)) is not None:
+        return refusal
     if target.is_dir():
         return {"ok": False, "error": f"Path is a directory: {raw_path}"}
     content = _first(arguments, "content", "text", "contents", "data")
@@ -108,6 +110,8 @@ def edit_file(arguments: dict[str, Any], ctx: ExecutionContext) -> dict[str, Any
         elif not target.exists():
             return {"ok": False, "error": f"File does not exist: {raw_path}."}
 
+    if (refusal := _sink_refusal(ctx, target)) is not None:
+        return refusal
     if target.is_dir():
         return {"ok": False, "error": f"Path is a directory: {raw_path}"}
 
@@ -192,6 +196,17 @@ def _first_str(arguments: dict[str, Any], *keys: str) -> str | None:
         val = arguments.get(key)
         if isinstance(val, str):
             return val
+    return None
+
+
+def _sink_refusal(ctx: ExecutionContext, target: Path) -> dict[str, Any] | None:
+    """Refuse a write to a harness-owned evidence log (compared on resolved paths)."""
+    if ctx.evidence is None:
+        return None
+    resolved = target.resolve()
+    for name in evidence.HARNESS_OWNED_SINKS:
+        if resolved == (Path(ctx.evidence) / name).resolve():
+            return {"ok": False, "error": f"{name} is written by the harness and is read-only"}
     return None
 
 

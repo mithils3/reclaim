@@ -22,6 +22,11 @@ from pathlib import Path
 
 from reclaim_vllm.vllm.io import append_jsonl_row
 
+COMMANDS_LOG = "commands.log"
+TRAJECTORY_LOG = "trajectory.jsonl"
+# Written only by the host harness: the sandbox mounts these read-only and the file tools refuse them.
+HARNESS_OWNED_SINKS = (COMMANDS_LOG, TRAJECTORY_LOG)
+
 
 @dataclass
 class EvidencePaths:
@@ -38,8 +43,8 @@ def evidence_paths(evidence_dir: Path) -> EvidencePaths:
     root = Path(evidence_dir)
     return EvidencePaths(
         root=root,
-        commands_log=root / "commands.log",
-        trajectory=root / "trajectory.jsonl",
+        commands_log=root / COMMANDS_LOG,
+        trajectory=root / TRAJECTORY_LOG,
         env_lock=root / "env.lock",
         patches_dir=root / "patches",
     )

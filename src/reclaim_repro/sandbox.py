@@ -46,6 +46,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterable
 
+from reclaim_repro.evidence import HARNESS_OWNED_SINKS
+
 if TYPE_CHECKING:
     from reclaim_repro.inputs import RunPaths
 
@@ -292,7 +294,8 @@ def from_run_paths(
 
     Every bind source must exist before ``apptainer`` runs, so we create the episode dirs
     and cache roots up front (idempotent) and drop any that can't be created. Cache roots
-    default to :func:`default_cache_dirs`. ``cpus`` sets the CPU-step core cap (CPU-cap helpers below).
+    default to :func:`default_cache_dirs`. The harness-owned evidence logs are re-bound read-only
+    on top of the evidence dir. ``cpus`` sets the CPU-step core cap (CPU-cap helpers below).
     """
     binds: list[Bind] = [Bind("/tmp", "/tmp")]  # node-local scratch (a real bind, not a tmpfs)
     workspace = _ensure_dir(run_paths.workspace)
@@ -301,6 +304,9 @@ def from_run_paths(
     evidence = _ensure_dir(run_paths.evidence)
     if evidence is not None:
         binds.append(Bind(str(evidence), CONTAINER_EVIDENCE))
+        for name in HARNESS_OWNED_SINKS:
+            (evidence / name).touch(exist_ok=True)
+            binds.append(Bind(str(evidence / name), f"{CONTAINER_EVIDENCE}/{name}", ro=True))
     reference = _ensure_dir(run_paths.reference)
     if reference is not None:
         binds.append(Bind(str(reference), CONTAINER_REFERENCE, ro=True))

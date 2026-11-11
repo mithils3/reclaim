@@ -42,6 +42,19 @@ class EvidenceTests(unittest.TestCase):
             rows = [json.loads(line) for line in (ev / "trajectory.jsonl").read_text().splitlines() if line]
             self.assertEqual([r["step"] for r in rows], [1, 2])
 
+    def test_harness_sinks_still_append_after_init(self):
+        with tempfile.TemporaryDirectory() as d:
+            ev = Path(d) / "evidence"
+            paths = evidence.init_evidence(ev)
+            self.assertEqual(
+                evidence.HARNESS_OWNED_SINKS,
+                (paths.commands_log.name, paths.trajectory.name),
+            )
+            evidence.log_command(ev, "make", returncode=0)
+            evidence.append_trajectory(ev, {"step": 1})
+            self.assertEqual(len(paths.commands_log.read_text().splitlines()), 1)
+            self.assertEqual(len(paths.trajectory.read_text().splitlines()), 1)
+
     def test_save_patch_sequences_and_slugs(self):
         with tempfile.TemporaryDirectory() as d:
             ev = Path(d) / "evidence"
